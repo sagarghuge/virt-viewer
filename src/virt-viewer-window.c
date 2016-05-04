@@ -91,6 +91,7 @@ struct _VirtViewerWindowPrivate {
     GtkWidget *window;
     GtkWidget *layout;
     GtkWidget *toolbar;
+    GtkWidget *header;
     GtkWidget *toolbar_usb_device_selection;
     GtkWidget *toolbar_send_key;
     GtkAccelGroup *accel_group;
@@ -295,6 +296,12 @@ virt_viewer_window_init (VirtViewerWindow *self)
     GtkWidget *vbox;
     GdkRGBA color;
     GSList *accels;
+    GtkWidget *fullscreen_button;
+    GtkWidget *fullscreen_image;
+    GtkWidget *menu_button;
+    GtkWidget *menu_image;
+    GtkWidget *key_button;
+    GtkWidget *key_image;
 
     self->priv = GET_PRIVATE(self);
     priv = self->priv;
@@ -344,10 +351,28 @@ virt_viewer_window_init (VirtViewerWindow *self)
      */
     gtk_widget_override_background_color(priv->layout, GTK_STATE_FLAG_NORMAL, &color);
 
+    priv->header = gtk_header_bar_new();
+
+    menu_button = gtk_button_new();
+    menu_image = gtk_image_new_from_icon_name("open-menu-symbolic", GTK_ICON_SIZE_BUTTON);
+    gtk_container_add (GTK_CONTAINER (menu_button), menu_image);
+    gtk_header_bar_pack_end (GTK_HEADER_BAR (priv->header), menu_button);
+
+    key_button = gtk_button_new();
+    key_image = gtk_image_new_from_icon_name("input-keyboard-symbolic", GTK_ICON_SIZE_BUTTON);
+    gtk_container_add (GTK_CONTAINER (key_button), key_image);
+    gtk_header_bar_pack_end (GTK_HEADER_BAR (priv->header), key_button);
+
+    fullscreen_button = gtk_button_new();
+    fullscreen_image = gtk_image_new_from_icon_name("view-fullscreen-symbolic", GTK_ICON_SIZE_BUTTON);
+    gtk_container_add (GTK_CONTAINER (fullscreen_button), fullscreen_image);
+    gtk_header_bar_pack_end (GTK_HEADER_BAR (priv->header), fullscreen_button);
+
     priv->window = GTK_WIDGET(gtk_builder_get_object(priv->builder, "viewer"));
     gtk_window_add_accel_group(GTK_WINDOW(priv->window), priv->accel_group);
 
     virt_viewer_window_update_title(self);
+   
     gtk_window_set_resizable(GTK_WINDOW(priv->window), TRUE);
     gtk_window_set_has_resize_grip(GTK_WINDOW(priv->window), FALSE);
     priv->accel_enabled = TRUE;
@@ -359,6 +384,11 @@ virt_viewer_window_init (VirtViewerWindow *self)
     }
 
     priv->zoomlevel = NORMAL_ZOOM_LEVEL;
+
+    gtk_header_bar_set_show_close_button (GTK_HEADER_BAR(priv->header), TRUE);
+    gtk_widget_show_all(priv->header);
+
+    gtk_window_set_titlebar(GTK_WINDOW(priv->window), priv->header);
 }
 
 static void
@@ -1206,7 +1236,7 @@ virt_viewer_window_update_title(VirtViewerWindow *self)
                                 priv->subtitle,
                                 g_get_application_name());
 
-    gtk_window_set_title(GTK_WINDOW(priv->window), title);
+    gtk_header_bar_set_title(GTK_HEADER_BAR(priv->header), title);
 
     g_free(title);
     g_free(ungrab);
