@@ -13,6 +13,7 @@ noinst_DATA =						\
 	virt-viewer-vm-connection.xml	\
 	virt-viewer-preferences.xml		\
 	remote-viewer-connect.xml		\
+	app-menu.xml \
 	$(NULL)
 
 EXTRA_DIST =					\

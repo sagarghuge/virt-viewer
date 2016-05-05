@@ -1783,8 +1783,15 @@ virt_viewer_app_on_application_startup(GApplication *app)
 {
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
     GError *error = NULL;
+    GtkBuilder *app_menu_builder;
+    GMenuModel *app_menu;
 
     G_APPLICATION_CLASS(virt_viewer_app_parent_class)->startup(app);
+
+    app_menu_builder = virt_viewer_util_load_ui("app-menu.xml");
+    app_menu = G_MENU_MODEL (gtk_builder_get_object (app_menu_builder, "appmenu"));
+    gtk_application_set_app_menu (GTK_APPLICATION (app), app_menu);
+    g_object_unref (app_menu_builder);
 
     self->priv->resource = virt_viewer_get_resource();
 
