@@ -355,8 +355,8 @@ virt_viewer_window_init (VirtViewerWindow *self)
     gtk_container_add (GTK_CONTAINER (gears), gears_image);
     gtk_header_bar_pack_end (GTK_HEADER_BAR (priv->header), gears);
 
-    menu = G_MENU_MODEL (gtk_builder_get_object (priv->builder, "gears-menu"));
-    gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (gears), menu);
+/*    menu = G_MENU_MODEL (gtk_builder_get_object (priv->builder, "gears-menu"));
+    gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (gears), menu);*/
 
     key_button = gtk_button_new();
     key_image = gtk_image_new_from_icon_name("input-keyboard-symbolic", GTK_ICON_SIZE_BUTTON);
