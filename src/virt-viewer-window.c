@@ -50,7 +50,6 @@ void virt_viewer_window_menu_view_zoom_reset(GtkWidget *menu, VirtViewerWindow *
 gboolean virt_viewer_window_delete(GtkWidget *src, void *dummy, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_quit(GtkWidget *src, VirtViewerWindow *self);
 void virt_viewer_window_guest_details_response(GtkDialog *dialog, gint response_id, gpointer user_data);
-void virt_viewer_window_menu_help_about(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_help_guest_details(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_view_fullscreen(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_send(GtkWidget *menu, VirtViewerWindow *self);
@@ -59,7 +58,6 @@ void virt_viewer_window_menu_file_usb_device_selection(GtkWidget *menu, VirtView
 void virt_viewer_window_menu_file_smartcard_insert(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_smartcard_remove(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_view_release_cursor(GtkWidget *menu, VirtViewerWindow *self);
-void virt_viewer_window_menu_preferences_cb(GtkWidget *menu, VirtViewerWindow *self);
 
 
 /* Internal methods */
@@ -298,8 +296,8 @@ virt_viewer_window_init (VirtViewerWindow *self)
     GSList *accels;
     GtkWidget *fullscreen_button;
     GtkWidget *fullscreen_image;
-    GtkWidget *menu_button;
-    GtkWidget *menu_image;
+    GtkWidget *gears;
+    GtkWidget *gears_image;
     GtkWidget *key_button;
     GtkWidget *key_image;
 
@@ -314,7 +312,6 @@ virt_viewer_window_init (VirtViewerWindow *self)
 
     gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-view-zoom")), FALSE);
-    gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-file-screenshot")), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-preferences")), FALSE);
 
     gtk_builder_connect_signals(priv->builder, self);
@@ -353,10 +350,13 @@ virt_viewer_window_init (VirtViewerWindow *self)
 
     priv->header = gtk_header_bar_new();
 
-    menu_button = gtk_button_new();
-    menu_image = gtk_image_new_from_icon_name("open-menu-symbolic", GTK_ICON_SIZE_BUTTON);
-    gtk_container_add (GTK_CONTAINER (menu_button), menu_image);
-    gtk_header_bar_pack_end (GTK_HEADER_BAR (priv->header), menu_button);
+    gears = gtk_button_new();
+    gears_image = gtk_image_new_from_icon_name("open-menu-symbolic", GTK_ICON_SIZE_BUTTON);
+    gtk_container_add (GTK_CONTAINER (gears), gears_image);
+    gtk_header_bar_pack_end (GTK_HEADER_BAR (priv->header), gears);
+
+    menu = G_MENU_MODEL (gtk_builder_get_object (priv->builder, "gears-menu"));
+    gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (gears), menu);
 
     key_button = gtk_button_new();
     key_image = gtk_image_new_from_icon_name("input-keyboard-symbolic", GTK_ICON_SIZE_BUTTON);
@@ -996,13 +996,6 @@ virt_viewer_window_menu_file_smartcard_remove(GtkWidget *menu G_GNUC_UNUSED,
 }
 
 G_MODULE_EXPORT void
-virt_viewer_window_menu_preferences_cb(GtkWidget *menu G_GNUC_UNUSED,
-                                       VirtViewerWindow *self)
-{
-    virt_viewer_app_show_preferences(self->priv->app, GTK_WIDGET(self->priv->window));
-}
-
-G_MODULE_EXPORT void
 virt_viewer_window_menu_view_release_cursor(GtkWidget *menu G_GNUC_UNUSED,
                                             VirtViewerWindow *self)
 {
@@ -1054,38 +1047,6 @@ virt_viewer_window_guest_details_response(GtkDialog *dialog,
 {
     if (response_id == GTK_RESPONSE_CLOSE)
         gtk_widget_hide(GTK_WIDGET(dialog));
-}
-
-G_MODULE_EXPORT void
-virt_viewer_window_menu_help_about(GtkWidget *menu G_GNUC_UNUSED,
-                                   VirtViewerWindow *self)
-{
-    GtkBuilder *about;
-    GtkWidget *dialog;
-    GdkPixbuf *icon;
-
-    about = virt_viewer_util_load_ui("virt-viewer-about.xml");
-
-    dialog = GTK_WIDGET(gtk_builder_get_object(about, "about"));
-
-    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION BUILDID);
-
-    icon = gdk_pixbuf_new_from_resource(VIRT_VIEWER_RESOURCE_PREFIX"/icons/48x48/virt-viewer.png", NULL);
-    if (icon != NULL) {
-        gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog), icon);
-        g_object_unref(icon);
-    } else {
-        gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), "virt-viewer");
-    }
-
-    gtk_window_set_transient_for(GTK_WINDOW(dialog),
-                                 GTK_WINDOW(self->priv->window));
-
-    gtk_builder_connect_signals(about, self);
-
-    gtk_widget_show_all(dialog);
-
-    g_object_unref(G_OBJECT(about));
 }
 
 
@@ -1282,9 +1243,6 @@ virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitiv
     menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-preferences"));
     gtk_widget_set_sensitive(menu, sensitive);
 
-    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-file-screenshot"));
-    gtk_widget_set_sensitive(menu, sensitive);
-
     menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-view-zoom"));
     gtk_widget_set_sensitive(menu, sensitive);
 
@@ -1307,8 +1265,6 @@ display_show_hint(VirtViewerDisplay *display,
         self->priv->initial_zoom_set = TRUE;
         virt_viewer_window_set_zoom_level(self, self->priv->zoomlevel);
     }
-
-    gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-file-screenshot")), hint);
 }
 static gboolean
 window_key_pressed (GtkWidget *widget G_GNUC_UNUSED,
