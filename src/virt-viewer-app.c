@@ -1798,7 +1798,7 @@ preferences_activated (GSimpleAction *action,
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
     GtkWidget *window;
 
-    window = GTK_WINDOW(virt_viewer_window_get_window(self->priv->main_window));
+    window = GTK_WIDGET(virt_viewer_window_get_window(self->priv->main_window));
 
     virt_viewer_app_show_preferences(self, window);
 }
@@ -1818,7 +1818,7 @@ about_activated (GSimpleAction *action,
 
     dialog = GTK_WIDGET(gtk_builder_get_object(about, "about"));
 
-    window = GTK_WINDOW(virt_viewer_window_get_window(self->priv->main_window));
+    window = GTK_WIDGET(virt_viewer_window_get_window(self->priv->main_window));
 
     gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION BUILDID);
 
@@ -1831,7 +1831,7 @@ about_activated (GSimpleAction *action,
     }
 
     gtk_window_set_transient_for(GTK_WINDOW(dialog),
-                                window);
+                                GTK_WINDOW(window));
 
     gtk_builder_connect_signals(about, window);
 
