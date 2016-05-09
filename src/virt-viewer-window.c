@@ -53,7 +53,6 @@ void virt_viewer_window_guest_details_response(GtkDialog *dialog, gint response_
 void virt_viewer_window_menu_help_guest_details(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_view_fullscreen(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_send(GtkWidget *menu, VirtViewerWindow *self);
-void virt_viewer_window_menu_file_screenshot(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_usb_device_selection(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_smartcard_insert(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_smartcard_remove(GtkWidget *menu, VirtViewerWindow *self);
@@ -61,6 +60,7 @@ void virt_viewer_window_menu_view_release_cursor(GtkWidget *menu, VirtViewerWind
 
 
 /* Internal methods */
+static void virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self);
 static void virt_viewer_window_enable_modifiers(VirtViewerWindow *self);
 static void virt_viewer_window_disable_modifiers(VirtViewerWindow *self);
 static void virt_viewer_window_queue_resize(VirtViewerWindow *self);
@@ -288,6 +288,78 @@ can_activate_cb (GtkWidget *widget G_GNUC_UNUSED,
 }
 
 static void
+screenshot_activated(GSimpleAction *action,
+                     GVariant      *parameter,
+                     gpointer       window)
+{
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
+
+    virt_viewer_window_menu_file_screenshot(self);
+}
+
+static void
+usb_device_selection_activated (GSimpleAction *action,
+                GVariant      *parameter,
+                gpointer       window)
+{
+
+}
+
+static void
+zoom_in_activated (GSimpleAction *action,
+                GVariant      *parameter,
+                gpointer       window)
+{
+
+}
+
+static void
+zoom_out_activated (GSimpleAction *action,
+                GVariant      *parameter,
+                gpointer       window)
+{
+
+}
+
+static void
+zoom_reset_activated (GSimpleAction *action,
+                GVariant      *parameter,
+                gpointer       window)
+{
+
+}
+
+static void
+guest_details_activated (GSimpleAction *action,
+                GVariant      *parameter,
+                gpointer       window)
+{
+
+}
+
+
+static void
+quit_activated (GSimpleAction *action,
+                GVariant      *parameter,
+                gpointer       window)
+{
+
+  VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
+
+  virt_viewer_app_maybe_quit(self->priv->app, self);
+}
+
+static GActionEntry gear_entries[] = {
+    { "screenshot", screenshot_activated, NULL, NULL, NULL, {0,0,0} },
+    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },
+    { "zoom-in", zoom_in_activated, NULL, "false", NULL, {0,0,0} },
+    { "zoom-out", zoom_out_activated, NULL, NULL, NULL, {0,0,0} },
+    { "zoom-reset", zoom_reset_activated, NULL, NULL, NULL, {0,0,0} },
+    { "guest-details", guest_details_activated, NULL, NULL, NULL, {0,0,0} },
+    { "quit", quit_activated, NULL, NULL, NULL, {0,0,0} }
+};
+
+static void
 virt_viewer_window_init (VirtViewerWindow *self)
 {
     VirtViewerWindowPrivate *priv;
@@ -308,7 +380,6 @@ virt_viewer_window_init (VirtViewerWindow *self)
 
     gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-view-zoom")), FALSE);
-    gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-preferences")), FALSE);
 
     gtk_builder_connect_signals(priv->builder, self);
 
@@ -367,6 +438,8 @@ virt_viewer_window_init (VirtViewerWindow *self)
     }
 
     priv->zoomlevel = NORMAL_ZOOM_LEVEL;
+
+    g_action_map_add_action_entries (G_ACTION_MAP (priv->window), gear_entries, G_N_ELEMENTS (gear_entries), self);
 
     gtk_window_set_titlebar(GTK_WINDOW(priv->window), priv->header);
 }
@@ -918,9 +991,8 @@ virt_viewer_window_save_screenshot(VirtViewerWindow *self,
     g_object_unref(pix);
 }
 
-G_MODULE_EXPORT void
-virt_viewer_window_menu_file_screenshot(GtkWidget *menu G_GNUC_UNUSED,
-                                        VirtViewerWindow *self)
+static void
+virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self)
 {
     GtkWidget *dialog;
     VirtViewerWindowPrivate *priv = self->priv;
@@ -1220,9 +1292,6 @@ virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitiv
 
     priv = self->priv;
 
-    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-preferences"));
-    gtk_widget_set_sensitive(menu, sensitive);
-
     menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-view-zoom"));
     gtk_widget_set_sensitive(menu, sensitive);
 
@@ -1306,7 +1375,6 @@ virt_viewer_window_set_display(VirtViewerWindow *self, VirtViewerDisplay *displa
         if (virt_viewer_display_get_enabled(display))
             virt_viewer_window_desktop_resize(display, self);
 
-        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-preferences")), TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-view-zoom")), TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), TRUE);
         gtk_widget_set_sensitive(self->priv->toolbar_send_key, TRUE);
