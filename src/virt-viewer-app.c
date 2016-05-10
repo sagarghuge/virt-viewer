@@ -1856,6 +1856,19 @@ static GActionEntry app_entries[] =
 };
 
 static void
+add_accelerator (GtkApplication *app,
+                 const gchar    *action_name,
+                 const gchar    *accel)
+{
+    const gchar *vaccels[] = {
+        accel,
+        NULL
+    };
+
+    gtk_application_set_accels_for_action (app, action_name, vaccels);
+}
+
+static void
 virt_viewer_app_on_application_startup(GApplication *app)
 {
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
@@ -1863,17 +1876,13 @@ virt_viewer_app_on_application_startup(GApplication *app)
     GtkBuilder *app_menu_builder;
     GMenuModel *app_menu;
 
-    const gchar *quit_accels[2] = { "<Shift><Ctrl>Q", NULL };
-
     G_APPLICATION_CLASS(virt_viewer_app_parent_class)->startup(app);
 
     g_action_map_add_action_entries(G_ACTION_MAP(app),
                                    app_entries, G_N_ELEMENTS(app_entries),
                                    app);
 
-    gtk_application_set_accels_for_action(GTK_APPLICATION(app),
-                                           "app.quit",
-                                           quit_accels);
+    add_accelerator(GTK_APPLICATION(app), "app.quit", "<Shift><Ctrl>Q");
 
     app_menu_builder = virt_viewer_util_load_ui("app-menu.xml");
     app_menu = G_MENU_MODEL (gtk_builder_get_object(app_menu_builder, "appmenu"));

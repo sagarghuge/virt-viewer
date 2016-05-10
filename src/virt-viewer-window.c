@@ -44,16 +44,12 @@
 #include "view/autoDrawer.h"
 
 /* Signal handlers for main window (move in a VirtViewerMainWindow?) */
-void virt_viewer_window_menu_view_zoom_out(GtkWidget *menu, VirtViewerWindow *self);
-void virt_viewer_window_menu_view_zoom_in(GtkWidget *menu, VirtViewerWindow *self);
-void virt_viewer_window_menu_view_zoom_reset(GtkWidget *menu, VirtViewerWindow *self);
 gboolean virt_viewer_window_delete(GtkWidget *src, void *dummy, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_quit(GtkWidget *src, VirtViewerWindow *self);
 void virt_viewer_window_guest_details_response(GtkDialog *dialog, gint response_id, gpointer user_data);
-void virt_viewer_window_menu_help_guest_details(GtkWidget *menu, VirtViewerWindow *self);
+
 void virt_viewer_window_menu_view_fullscreen(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_send(GtkWidget *menu, VirtViewerWindow *self);
-void virt_viewer_window_menu_file_usb_device_selection(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_smartcard_insert(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_smartcard_remove(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_view_release_cursor(GtkWidget *menu, VirtViewerWindow *self);
@@ -61,6 +57,7 @@ void virt_viewer_window_menu_view_release_cursor(GtkWidget *menu, VirtViewerWind
 
 /* Internal methods */
 static void virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self);
+static void virt_viewer_window_menu_help_guest_details(VirtViewerWindow *self);
 static void virt_viewer_window_enable_modifiers(VirtViewerWindow *self);
 static void virt_viewer_window_disable_modifiers(VirtViewerWindow *self);
 static void virt_viewer_window_queue_resize(VirtViewerWindow *self);
@@ -279,6 +276,18 @@ virt_viewer_window_class_init (VirtViewerWindowClass *klass)
                                                         G_PARAM_STATIC_STRINGS));
 }
 
+static gint
+virt_viewer_window_get_real_zoom_level(VirtViewerWindow *self)
+{
+    GtkAllocation allocation;
+    guint width, height;
+
+    gtk_widget_get_allocation(GTK_WIDGET(self->priv->display), &allocation);
+    virt_viewer_display_get_desktop_size(self->priv->display, &width, &height);
+
+    return round((double) NORMAL_ZOOM_LEVEL * allocation.width / width);
+}
+
 static gboolean
 can_activate_cb (GtkWidget *widget G_GNUC_UNUSED,
                  guint signal_id G_GNUC_UNUSED,
@@ -299,44 +308,56 @@ screenshot_activated(GSimpleAction *action,
 
 static void
 usb_device_selection_activated (GSimpleAction *action,
-                GVariant      *parameter,
-                gpointer       window)
+                                GVariant      *parameter,
+                                gpointer       window)
 {
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
 
+    virt_viewer_session_usb_device_selection(virt_viewer_app_get_session(self->priv->app),
+                                             GTK_WINDOW(self->priv->window));
 }
 
 static void
 zoom_in_activated (GSimpleAction *action,
-                GVariant      *parameter,
-                gpointer       window)
+                   GVariant      *parameter,
+                   gpointer       window)
 {
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
 
+    virt_viewer_window_set_zoom_level(self,
+                                      virt_viewer_window_get_real_zoom_level(self) + ZOOM_STEP);
 }
 
 static void
 zoom_out_activated (GSimpleAction *action,
-                GVariant      *parameter,
-                gpointer       window)
+                    GVariant      *parameter,
+                    gpointer       window)
 {
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
 
+    virt_viewer_window_set_zoom_level(self,
+                                      virt_viewer_window_get_real_zoom_level(self) - ZOOM_STEP);
 }
 
 static void
 zoom_reset_activated (GSimpleAction *action,
-                GVariant      *parameter,
-                gpointer       window)
+                      GVariant      *parameter,
+                      gpointer       window)
 {
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
 
+    virt_viewer_window_set_zoom_level(self, NORMAL_ZOOM_LEVEL);
 }
 
 static void
 guest_details_activated (GSimpleAction *action,
-                GVariant      *parameter,
-                gpointer       window)
+                         GVariant      *parameter,
+                         gpointer       window)
 {
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
 
+    virt_viewer_window_menu_help_guest_details(self);
 }
-
 
 static void
 quit_activated (GSimpleAction *action,
@@ -352,7 +373,7 @@ quit_activated (GSimpleAction *action,
 static GActionEntry gear_entries[] = {
     { "screenshot", screenshot_activated, NULL, NULL, NULL, {0,0,0} },
     { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },
-    { "zoom-in", zoom_in_activated, NULL, "false", NULL, {0,0,0} },
+    { "zoom-in", zoom_in_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-out", zoom_out_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-reset", zoom_reset_activated, NULL, NULL, NULL, {0,0,0} },
     { "guest-details", guest_details_activated, NULL, NULL, NULL, {0,0,0} },
@@ -393,12 +414,6 @@ virt_viewer_window_init (VirtViewerWindow *self)
     g_signal_connect(gtk_builder_get_object(priv->builder, "menu-file-smartcard-remove"),
                      "can-activate-accel", G_CALLBACK(can_activate_cb), self);
     g_signal_connect(gtk_builder_get_object(priv->builder, "menu-view-release-cursor"),
-                     "can-activate-accel", G_CALLBACK(can_activate_cb), self);
-    g_signal_connect(gtk_builder_get_object(priv->builder, "menu-view-zoom-reset"),
-                     "can-activate-accel", G_CALLBACK(can_activate_cb), self);
-    g_signal_connect(gtk_builder_get_object(priv->builder, "menu-view-zoom-in"),
-                     "can-activate-accel", G_CALLBACK(can_activate_cb), self);
-    g_signal_connect(gtk_builder_get_object(priv->builder, "menu-view-zoom-out"),
                      "can-activate-accel", G_CALLBACK(can_activate_cb), self);
 
     vbox = GTK_WIDGET(gtk_builder_get_object(priv->builder, "viewer-box"));
@@ -453,41 +468,6 @@ virt_viewer_window_desktop_resize(VirtViewerDisplay *display G_GNUC_UNUSED,
         return;
     }
     virt_viewer_window_queue_resize(self);
-}
-
-static gint
-virt_viewer_window_get_real_zoom_level(VirtViewerWindow *self)
-{
-    GtkAllocation allocation;
-    guint width, height;
-
-    gtk_widget_get_allocation(GTK_WIDGET(self->priv->display), &allocation);
-    virt_viewer_display_get_desktop_size(self->priv->display, &width, &height);
-
-    return round((double) NORMAL_ZOOM_LEVEL * allocation.width / width);
-}
-
-G_MODULE_EXPORT void
-virt_viewer_window_menu_view_zoom_out(GtkWidget *menu G_GNUC_UNUSED,
-                                      VirtViewerWindow *self)
-{
-    virt_viewer_window_set_zoom_level(self,
-                                      virt_viewer_window_get_real_zoom_level(self) - ZOOM_STEP);
-}
-
-G_MODULE_EXPORT void
-virt_viewer_window_menu_view_zoom_in(GtkWidget *menu G_GNUC_UNUSED,
-                                     VirtViewerWindow *self)
-{
-    virt_viewer_window_set_zoom_level(self,
-                                      virt_viewer_window_get_real_zoom_level(self) + ZOOM_STEP);
-}
-
-G_MODULE_EXPORT void
-virt_viewer_window_menu_view_zoom_reset(GtkWidget *menu G_GNUC_UNUSED,
-                                        VirtViewerWindow *self)
-{
-    virt_viewer_window_set_zoom_level(self, NORMAL_ZOOM_LEVEL);
 }
 
 /* Kick GtkWindow to tell it to adjust to our new widget sizes */
@@ -1026,14 +1006,6 @@ virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self)
 }
 
 G_MODULE_EXPORT void
-virt_viewer_window_menu_file_usb_device_selection(GtkWidget *menu G_GNUC_UNUSED,
-                                                  VirtViewerWindow *self)
-{
-    virt_viewer_session_usb_device_selection(virt_viewer_app_get_session(self->priv->app),
-                                             GTK_WINDOW(self->priv->window));
-}
-
-G_MODULE_EXPORT void
 virt_viewer_window_menu_file_smartcard_insert(GtkWidget *menu G_GNUC_UNUSED,
                                               VirtViewerWindow *self)
 {
@@ -1056,8 +1028,16 @@ virt_viewer_window_menu_view_release_cursor(GtkWidget *menu G_GNUC_UNUSED,
 }
 
 G_MODULE_EXPORT void
-virt_viewer_window_menu_help_guest_details(GtkWidget *menu G_GNUC_UNUSED,
-                                           VirtViewerWindow *self)
+virt_viewer_window_guest_details_response(GtkDialog *dialog,
+                                          gint response_id,
+                                          gpointer user_data G_GNUC_UNUSED)
+{
+    if (response_id == GTK_RESPONSE_CLOSE)
+        gtk_widget_hide(GTK_WIDGET(dialog));
+}
+
+static void
+virt_viewer_window_menu_help_guest_details(VirtViewerWindow *self)
 {
     GtkBuilder *ui = virt_viewer_util_load_ui("virt-viewer-guest-details.xml");
     char *name = NULL;
@@ -1092,16 +1072,6 @@ virt_viewer_window_menu_help_guest_details(GtkWidget *menu G_GNUC_UNUSED,
     g_object_unref(G_OBJECT(ui));
 }
 
-G_MODULE_EXPORT void
-virt_viewer_window_guest_details_response(GtkDialog *dialog,
-                                          gint response_id,
-                                          gpointer user_data G_GNUC_UNUSED)
-{
-    if (response_id == GTK_RESPONSE_CLOSE)
-        gtk_widget_hide(GTK_WIDGET(dialog));
-}
-
-
 static void
 virt_viewer_window_toolbar_setup(VirtViewerWindow *self)
 {
@@ -1127,7 +1097,7 @@ virt_viewer_window_toolbar_setup(VirtViewerWindow *self)
     gtk_tool_button_set_label(GTK_TOOL_BUTTON(button), _("USB device selection"));
     gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(button), _("USB device selection"));
     gtk_toolbar_insert(GTK_TOOLBAR(priv->toolbar), GTK_TOOL_ITEM(button), 0);
-    g_signal_connect(button, "clicked", G_CALLBACK(virt_viewer_window_menu_file_usb_device_selection), self);
+    g_signal_connect(button, "clicked", G_CALLBACK(usb_device_selection_activated), self);
     priv->toolbar_usb_device_selection = button;
     gtk_widget_show_all(button);
 
@@ -1272,13 +1242,15 @@ void
 virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean sensitive)
 {
     VirtViewerWindowPrivate *priv;
-    GtkWidget *menu;
+    GAction *action;
 
     g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
 
     priv = self->priv;
-    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-file-usb-device-selection"));
-    gtk_widget_set_sensitive(menu, sensitive);
+    action = g_action_map_lookup_action (G_ACTION_MAP (priv->window), "usb-device-selection");
+    g_simple_action_set_enabled (G_SIMPLE_ACTION (action),
+                                 (sensitive == TRUE));
+
     gtk_widget_set_visible(priv->toolbar_usb_device_selection, sensitive);
 }
 
