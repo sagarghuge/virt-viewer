@@ -1841,6 +1841,70 @@ about_activated (GSimpleAction *action,
 }
 
 static void
+screenshot_activated(GSimpleAction *action,
+                     GVariant      *parameter,
+                     gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    virt_viewer_window_menu_file_screenshot(self->priv->main_window);
+}
+
+static void
+usb_device_selection_activated (GSimpleAction *action,
+                                GVariant      *parameter,
+                                gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+    GtkWindow *window = virt_viewer_window_get_window(self->priv->main_window);
+
+    virt_viewer_session_usb_device_selection(virt_viewer_app_get_session(self),
+                                             window);
+}
+
+static void
+zoom_in_activated (GSimpleAction *action,
+                   GVariant      *parameter,
+                   gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    virt_viewer_window_set_zoom_level(self->priv->main_window,
+                                      virt_viewer_window_get_real_zoom_level_helper(self->priv->main_window) + ZOOM_STEP);
+}
+
+static void
+zoom_out_activated (GSimpleAction *action,
+                    GVariant      *parameter,
+                    gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    virt_viewer_window_set_zoom_level(self->priv->main_window,
+                                      virt_viewer_window_get_real_zoom_level_helper(self->priv->main_window) - ZOOM_STEP);
+}
+
+static void
+zoom_reset_activated (GSimpleAction *action,
+                      GVariant      *parameter,
+                      gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    virt_viewer_window_set_zoom_level(self->priv->main_window, NORMAL_ZOOM_LEVEL);
+}
+
+static void
+guest_details_activated (GSimpleAction *action,
+                         GVariant      *parameter,
+                         gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    virt_viewer_window_menu_help_guest_details(self->priv->main_window);
+}
+
+static void
 quit_activated (GSimpleAction *action,
                 GVariant      *parameter,
                 gpointer       app)
@@ -1853,6 +1917,16 @@ static GActionEntry app_entries[] =
     {"preferences", preferences_activated, NULL, NULL, NULL, {0,0,0} },
     {"about", about_activated, NULL, NULL, NULL, {0,0,0} },
     {"quit", quit_activated, NULL, NULL, NULL, {0,0,0} }
+};
+
+static GActionEntry gear_entries[] = {
+    { "screenshot", screenshot_activated, NULL, NULL, NULL, {0,0,0} },
+    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },
+    { "zoom-in", zoom_in_activated, NULL, NULL, NULL, {0,0,0} },
+    { "zoom-out", zoom_out_activated, NULL, NULL, NULL, {0,0,0} },
+    { "zoom-reset", zoom_reset_activated, NULL, NULL, NULL, {0,0,0} },
+    { "guest-details", guest_details_activated, NULL, NULL, NULL, {0,0,0} },
+    { "quit", quit_activated, NULL, NULL, NULL, {0,0,0} }
 };
 
 static void
@@ -1875,6 +1949,7 @@ virt_viewer_app_on_application_startup(GApplication *app)
     GError *error = NULL;
     GtkBuilder *app_menu_builder;
     GMenuModel *app_menu;
+    GtkWidget  *window;
 
     G_APPLICATION_CLASS(virt_viewer_app_parent_class)->startup(app);
 
@@ -1883,6 +1958,10 @@ virt_viewer_app_on_application_startup(GApplication *app)
                                    app);
 
     add_accelerator(GTK_APPLICATION(app), "app.quit", "<Shift><Ctrl>Q");
+    add_accelerator(GTK_APPLICATION(app), "win.fullscreen", "F11");
+    add_accelerator(GTK_APPLICATION(app), "win.zoom-in", "<Ctrl>plus");
+    add_accelerator(GTK_APPLICATION(app), "win.zoom-out", "<Ctrl>minus");
+    add_accelerator(GTK_APPLICATION(app), "win.zoom-reset", "<Ctrl>O");
 
     app_menu_builder = virt_viewer_util_load_ui("app-menu.xml");
     app_menu = G_MENU_MODEL (gtk_builder_get_object(app_menu_builder, "appmenu"));
@@ -1913,11 +1992,7 @@ virt_viewer_app_on_application_startup(GApplication *app)
 
     virt_viewer_set_insert_smartcard_accel(self, GDK_KEY_F8, GDK_SHIFT_MASK);
     virt_viewer_set_remove_smartcard_accel(self, GDK_KEY_F9, GDK_SHIFT_MASK);
-    gtk_accel_map_add_entry("<virt-viewer>/view/toggle-fullscreen", GDK_KEY_F11, 0);
     gtk_accel_map_add_entry("<virt-viewer>/view/release-cursor", GDK_KEY_F12, GDK_SHIFT_MASK);
-    gtk_accel_map_add_entry("<virt-viewer>/view/zoom-reset", GDK_KEY_0, GDK_CONTROL_MASK);
-    gtk_accel_map_add_entry("<virt-viewer>/view/zoom-out", GDK_KEY_minus, GDK_CONTROL_MASK);
-    gtk_accel_map_add_entry("<virt-viewer>/view/zoom-in", GDK_KEY_plus, GDK_CONTROL_MASK);
     gtk_accel_map_add_entry("<virt-viewer>/send/secure-attention", GDK_KEY_End, GDK_CONTROL_MASK | GDK_MOD1_MASK);
 
     if (!virt_viewer_app_start(self, &error)) {
@@ -1928,6 +2003,10 @@ virt_viewer_app_on_application_startup(GApplication *app)
         g_application_quit(app);
         return;
     }
+
+    window = GTK_WIDGET(virt_viewer_window_get_window(self->priv->main_window));
+
+    g_action_map_add_action_entries (G_ACTION_MAP (window), gear_entries, G_N_ELEMENTS (gear_entries), self);
 
     g_application_hold(app);
 }

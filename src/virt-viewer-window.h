@@ -82,6 +82,9 @@ void virt_viewer_window_enter_fullscreen(VirtViewerWindow *self, gint monitor);
 GtkMenuItem *virt_viewer_window_get_menu_displays(VirtViewerWindow *self);
 GtkBuilder* virt_viewer_window_get_builder(VirtViewerWindow *window);
 void virt_viewer_window_set_kiosk(VirtViewerWindow *self, gboolean enabled);
+void virt_viewer_window_menu_help_guest_details(VirtViewerWindow *self);
+gint virt_viewer_window_get_real_zoom_level_helper(VirtViewerWindow *self);
+void virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self);
 
 G_END_DECLS
 

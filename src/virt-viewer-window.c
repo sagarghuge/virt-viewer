@@ -54,10 +54,7 @@ void virt_viewer_window_menu_file_smartcard_insert(GtkWidget *menu, VirtViewerWi
 void virt_viewer_window_menu_file_smartcard_remove(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_view_release_cursor(GtkWidget *menu, VirtViewerWindow *self);
 
-
 /* Internal methods */
-static void virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self);
-static void virt_viewer_window_menu_help_guest_details(VirtViewerWindow *self);
 static void virt_viewer_window_enable_modifiers(VirtViewerWindow *self);
 static void virt_viewer_window_disable_modifiers(VirtViewerWindow *self);
 static void virt_viewer_window_queue_resize(VirtViewerWindow *self);
@@ -297,90 +294,6 @@ can_activate_cb (GtkWidget *widget G_GNUC_UNUSED,
 }
 
 static void
-screenshot_activated(GSimpleAction *action,
-                     GVariant      *parameter,
-                     gpointer       window)
-{
-    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
-
-    virt_viewer_window_menu_file_screenshot(self);
-}
-
-static void
-usb_device_selection_activated (GSimpleAction *action,
-                                GVariant      *parameter,
-                                gpointer       window)
-{
-    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
-
-    virt_viewer_session_usb_device_selection(virt_viewer_app_get_session(self->priv->app),
-                                             GTK_WINDOW(self->priv->window));
-}
-
-static void
-zoom_in_activated (GSimpleAction *action,
-                   GVariant      *parameter,
-                   gpointer       window)
-{
-    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
-
-    virt_viewer_window_set_zoom_level(self,
-                                      virt_viewer_window_get_real_zoom_level(self) + ZOOM_STEP);
-}
-
-static void
-zoom_out_activated (GSimpleAction *action,
-                    GVariant      *parameter,
-                    gpointer       window)
-{
-    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
-
-    virt_viewer_window_set_zoom_level(self,
-                                      virt_viewer_window_get_real_zoom_level(self) - ZOOM_STEP);
-}
-
-static void
-zoom_reset_activated (GSimpleAction *action,
-                      GVariant      *parameter,
-                      gpointer       window)
-{
-    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
-
-    virt_viewer_window_set_zoom_level(self, NORMAL_ZOOM_LEVEL);
-}
-
-static void
-guest_details_activated (GSimpleAction *action,
-                         GVariant      *parameter,
-                         gpointer       window)
-{
-    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
-
-    virt_viewer_window_menu_help_guest_details(self);
-}
-
-static void
-quit_activated (GSimpleAction *action,
-                GVariant      *parameter,
-                gpointer       window)
-{
-
-  VirtViewerWindow *self =  VIRT_VIEWER_WINDOW (window);
-
-  virt_viewer_app_maybe_quit(self->priv->app, self);
-}
-
-static GActionEntry gear_entries[] = {
-    { "screenshot", screenshot_activated, NULL, NULL, NULL, {0,0,0} },
-    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },
-    { "zoom-in", zoom_in_activated, NULL, NULL, NULL, {0,0,0} },
-    { "zoom-out", zoom_out_activated, NULL, NULL, NULL, {0,0,0} },
-    { "zoom-reset", zoom_reset_activated, NULL, NULL, NULL, {0,0,0} },
-    { "guest-details", guest_details_activated, NULL, NULL, NULL, {0,0,0} },
-    { "quit", quit_activated, NULL, NULL, NULL, {0,0,0} }
-};
-
-static void
 virt_viewer_window_init (VirtViewerWindow *self)
 {
     VirtViewerWindowPrivate *priv;
@@ -454,8 +367,6 @@ virt_viewer_window_init (VirtViewerWindow *self)
 
     priv->zoomlevel = NORMAL_ZOOM_LEVEL;
 
-    g_action_map_add_action_entries (G_ACTION_MAP (priv->window), gear_entries, G_N_ELEMENTS (gear_entries), self);
-
     gtk_window_set_titlebar(GTK_WINDOW(priv->window), priv->header);
 }
 
@@ -518,6 +429,12 @@ virt_viewer_window_menu_fullscreen_set_active(VirtViewerWindow *self, gboolean a
     g_signal_handlers_block_by_func(check, virt_viewer_window_menu_view_fullscreen, self);
     gtk_check_menu_item_set_active(check, active);
     g_signal_handlers_unblock_by_func(check, virt_viewer_window_menu_view_fullscreen, self);
+}
+
+gint
+virt_viewer_window_get_real_zoom_level_helper(VirtViewerWindow *self)
+{
+    return virt_viewer_window_get_real_zoom_level(self);
 }
 
 void
@@ -971,7 +888,7 @@ virt_viewer_window_save_screenshot(VirtViewerWindow *self,
     g_object_unref(pix);
 }
 
-static void
+void
 virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self)
 {
     GtkWidget *dialog;
@@ -1036,7 +953,7 @@ virt_viewer_window_guest_details_response(GtkDialog *dialog,
         gtk_widget_hide(GTK_WIDGET(dialog));
 }
 
-static void
+void
 virt_viewer_window_menu_help_guest_details(VirtViewerWindow *self)
 {
     GtkBuilder *ui = virt_viewer_util_load_ui("virt-viewer-guest-details.xml");
@@ -1097,7 +1014,7 @@ virt_viewer_window_toolbar_setup(VirtViewerWindow *self)
     gtk_tool_button_set_label(GTK_TOOL_BUTTON(button), _("USB device selection"));
     gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(button), _("USB device selection"));
     gtk_toolbar_insert(GTK_TOOLBAR(priv->toolbar), GTK_TOOL_ITEM(button), 0);
-    g_signal_connect(button, "clicked", G_CALLBACK(usb_device_selection_activated), self);
+    //g_signal_connect(button, "clicked", G_CALLBACK(usb_device_selection_activated), self);
     priv->toolbar_usb_device_selection = button;
     gtk_widget_show_all(button);
 
