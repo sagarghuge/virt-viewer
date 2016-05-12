@@ -294,6 +294,21 @@ can_activate_cb (GtkWidget *widget G_GNUC_UNUSED,
 }
 
 static void
+usb_device_selection_activated (GSimpleAction *action,
+                                GVariant      *parameter,
+                                gpointer       window)
+{
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
+
+    virt_viewer_session_usb_device_selection(virt_viewer_app_get_session(self->priv->app),
+                                             GTK_WINDOW(self->priv->window));
+}
+
+static GActionEntry gear_entries[] = {
+    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} }
+};
+
+static void
 virt_viewer_window_init (VirtViewerWindow *self)
 {
     VirtViewerWindowPrivate *priv;
@@ -313,7 +328,6 @@ virt_viewer_window_init (VirtViewerWindow *self)
     priv->builder = virt_viewer_util_load_ui("virt-viewer.xml");
 
     gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), FALSE);
-    gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-view-zoom")), FALSE);
 
     gtk_builder_connect_signals(priv->builder, self);
 
@@ -366,6 +380,8 @@ virt_viewer_window_init (VirtViewerWindow *self)
     }
 
     priv->zoomlevel = NORMAL_ZOOM_LEVEL;
+
+    g_action_map_add_action_entries (G_ACTION_MAP (priv->window), gear_entries, G_N_ELEMENTS (gear_entries), self);
 
     gtk_window_set_titlebar(GTK_WINDOW(priv->window), priv->header);
 }
@@ -1164,8 +1180,8 @@ virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean se
     g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
 
     priv = self->priv;
-    action = g_action_map_lookup_action (G_ACTION_MAP (priv->window), "usb-device-selection");
-    g_simple_action_set_enabled (G_SIMPLE_ACTION (action),
+    action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "usb-device-selection");
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
                                  (sensitive == TRUE));
 
     gtk_widget_set_visible(priv->toolbar_usb_device_selection, sensitive);
@@ -1180,9 +1196,6 @@ virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitiv
     g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
 
     priv = self->priv;
-
-    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-view-zoom"));
-    gtk_widget_set_sensitive(menu, sensitive);
 
     menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-send"));
     gtk_widget_set_sensitive(menu, sensitive);
@@ -1264,7 +1277,6 @@ virt_viewer_window_set_display(VirtViewerWindow *self, VirtViewerDisplay *displa
         if (virt_viewer_display_get_enabled(display))
             virt_viewer_window_desktop_resize(display, self);
 
-        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-view-zoom")), TRUE);
         gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), TRUE);
         gtk_widget_set_sensitive(self->priv->toolbar_send_key, TRUE);
     }

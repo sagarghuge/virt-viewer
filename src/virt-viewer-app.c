@@ -1850,7 +1850,7 @@ screenshot_activated(GSimpleAction *action,
     virt_viewer_window_menu_file_screenshot(self->priv->main_window);
 }
 
-static void
+/*static void
 usb_device_selection_activated (GSimpleAction *action,
                                 GVariant      *parameter,
                                 gpointer       app)
@@ -1860,7 +1860,7 @@ usb_device_selection_activated (GSimpleAction *action,
 
     virt_viewer_session_usb_device_selection(virt_viewer_app_get_session(self),
                                              window);
-}
+}*/
 
 static void
 zoom_in_activated (GSimpleAction *action,
@@ -1921,7 +1921,7 @@ static GActionEntry app_entries[] =
 
 static GActionEntry gear_entries[] = {
     { "screenshot", screenshot_activated, NULL, NULL, NULL, {0,0,0} },
-    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },
+/*    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },*/
     { "zoom-in", zoom_in_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-out", zoom_out_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-reset", zoom_reset_activated, NULL, NULL, NULL, {0,0,0} },
@@ -1949,7 +1949,7 @@ virt_viewer_app_on_application_startup(GApplication *app)
     GError *error = NULL;
     GtkBuilder *app_menu_builder;
     GMenuModel *app_menu;
-    GtkWidget  *window;
+    GtkWindow  *window;
 
     G_APPLICATION_CLASS(virt_viewer_app_parent_class)->startup(app);
 
@@ -2004,7 +2004,7 @@ virt_viewer_app_on_application_startup(GApplication *app)
         return;
     }
 
-    window = GTK_WIDGET(virt_viewer_window_get_window(self->priv->main_window));
+    window = GTK_WINDOW(virt_viewer_window_get_window(self->priv->main_window));
 
     g_action_map_add_action_entries (G_ACTION_MAP (window), gear_entries, G_N_ELEMENTS (gear_entries), self);
 
