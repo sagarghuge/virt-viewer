@@ -48,7 +48,6 @@ gboolean virt_viewer_window_delete(GtkWidget *src, void *dummy, VirtViewerWindow
 void virt_viewer_window_menu_file_quit(GtkWidget *src, VirtViewerWindow *self);
 void virt_viewer_window_guest_details_response(GtkDialog *dialog, gint response_id, gpointer user_data);
 
-void virt_viewer_window_menu_view_fullscreen(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_send(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_smartcard_insert(GtkWidget *menu, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_smartcard_remove(GtkWidget *menu, VirtViewerWindow *self);
@@ -309,6 +308,12 @@ static GActionEntry gear_entries[] = {
 };
 
 static void
+virt_viewer_window_menu_view_fullscreen_cb(GtkButton *button, VirtViewerWindow *self)
+{
+    virt_viewer_window_menu_view_fullscreen(self);
+}
+
+static void
 virt_viewer_window_init (VirtViewerWindow *self)
 {
     VirtViewerWindowPrivate *priv;
@@ -316,6 +321,7 @@ virt_viewer_window_init (VirtViewerWindow *self)
     GdkRGBA color;
     GSList *accels;
     GtkWidget *gears;
+    GtkWidget *fullscreen;
     GMenuModel *gears_menu;
 
     self->priv = GET_PRIVATE(self);
@@ -363,6 +369,9 @@ virt_viewer_window_init (VirtViewerWindow *self)
 
     gears_menu = G_MENU_MODEL (gtk_builder_get_object (priv->builder, "gears-menu"));
     gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (gears), gears_menu);
+
+    fullscreen = GTK_WIDGET(gtk_builder_get_object(priv->builder, "fullscreen"));
+    g_signal_connect(fullscreen, "clicked", G_CALLBACK(virt_viewer_window_menu_view_fullscreen_cb), self);
 
     priv->window = GTK_WIDGET(gtk_builder_get_object(priv->builder, "viewer"));
     gtk_window_add_accel_group(GTK_WINDOW(priv->window), priv->accel_group);
@@ -437,16 +446,6 @@ mapped(GtkWidget *widget, GdkEvent *event G_GNUC_UNUSED,
     return FALSE;
 }
 
-static void
-virt_viewer_window_menu_fullscreen_set_active(VirtViewerWindow *self, gboolean active)
-{
-    GtkCheckMenuItem *check = GTK_CHECK_MENU_ITEM(gtk_builder_get_object(self->priv->builder, "menu-view-fullscreen"));
-
-    g_signal_handlers_block_by_func(check, virt_viewer_window_menu_view_fullscreen, self);
-    gtk_check_menu_item_set_active(check, active);
-    g_signal_handlers_unblock_by_func(check, virt_viewer_window_menu_view_fullscreen, self);
-}
-
 gint
 virt_viewer_window_get_real_zoom_level_helper(VirtViewerWindow *self)
 {
@@ -466,7 +465,6 @@ virt_viewer_window_leave_fullscreen(VirtViewerWindow *self)
     if (!priv->fullscreen)
         return;
 
-    virt_viewer_window_menu_fullscreen_set_active(self, FALSE);
     priv->fullscreen = FALSE;
     priv->fullscreen_monitor = -1;
     if (priv->display) {
@@ -507,7 +505,6 @@ virt_viewer_window_enter_fullscreen(VirtViewerWindow *self, gint monitor)
         return;
     }
 
-    virt_viewer_window_menu_fullscreen_set_active(self, TRUE);
     gtk_widget_hide(menu);
     gtk_widget_show(priv->toolbar);
     ViewAutoDrawer_SetActive(VIEW_AUTODRAWER(priv->layout), TRUE);
@@ -823,16 +820,6 @@ virt_viewer_window_toolbar_send_key(GtkWidget *button G_GNUC_UNUSED,
     g_object_unref(menu);
 }
 
-
-G_MODULE_EXPORT void
-virt_viewer_window_menu_view_fullscreen(GtkWidget *menu,
-                                        VirtViewerWindow *self)
-{
-    gboolean fullscreen = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menu));
-
-    virt_viewer_window_set_fullscreen(self, fullscreen);
-}
-
 static void add_if_writable (GdkPixbufFormat *data, GHashTable *formats)
 {
     if (gdk_pixbuf_format_is_writable(data)) {
@@ -902,6 +889,16 @@ virt_viewer_window_save_screenshot(VirtViewerWindow *self,
     }
 
     g_object_unref(pix);
+}
+
+void
+virt_viewer_window_menu_view_fullscreen(VirtViewerWindow *self)
+{
+    if(self->priv->fullscreen) {
+        virt_viewer_window_set_fullscreen(self, FALSE);
+    } else {
+        virt_viewer_window_set_fullscreen(self, TRUE);
+    }
 }
 
 void

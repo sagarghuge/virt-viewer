@@ -1850,6 +1850,17 @@ screenshot_activated(GSimpleAction *action,
     virt_viewer_window_menu_file_screenshot(self->priv->main_window);
 }
 
+
+static void
+fullscreen_activated(GSimpleAction *action,
+                     GVariant      *parameter,
+                     gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    virt_viewer_window_menu_view_fullscreen(self->priv->main_window);
+}
+
 /*static void
 usb_device_selection_activated (GSimpleAction *action,
                                 GVariant      *parameter,
@@ -1909,7 +1920,7 @@ quit_activated (GSimpleAction *action,
                 GVariant      *parameter,
                 gpointer       app)
 {
-  g_application_quit (G_APPLICATION (app));
+    g_application_quit (G_APPLICATION (app));
 }
 
 static GActionEntry app_entries[] =
@@ -1922,6 +1933,7 @@ static GActionEntry app_entries[] =
 static GActionEntry gear_entries[] = {
     { "screenshot", screenshot_activated, NULL, NULL, NULL, {0,0,0} },
 /*    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },*/
+    { "fullscreen", fullscreen_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-in", zoom_in_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-out", zoom_out_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-reset", zoom_reset_activated, NULL, NULL, NULL, {0,0,0} },
