@@ -871,7 +871,7 @@ create_ovirt_session(VirtViewerApp *app, const char *uri, GError **err)
     vms = ovirt_api_get_vms(api);
     ovirt_collection_fetch(vms, proxy, &error);
     if (error != NULL) {
-        g_debug("failed to lookup %s: %s", vm_name, error->message);
+        g_debug("failed to fetch oVirt 'vms' collection: %s", error->message);
         goto error;
     }
     if (vm_name == NULL ||
@@ -997,8 +997,6 @@ error:
         g_object_unref(display);
     if (vm != NULL)
         g_object_unref(vm);
-    if (api != NULL)
-        g_object_unref(api);
     if (proxy != NULL)
         g_object_unref(proxy);
 
