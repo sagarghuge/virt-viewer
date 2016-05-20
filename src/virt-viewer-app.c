@@ -1850,6 +1850,26 @@ screenshot_activated(GSimpleAction *action,
     virt_viewer_window_menu_file_screenshot(self->priv->main_window);
 }
 
+static void
+smartcard_insert_activated(GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    virt_viewer_session_smartcard_insert(virt_viewer_app_get_session(self));
+}
+
+
+static void
+smartcard_remove_activated(GSimpleAction *action,
+                           GVariant      *parameter,
+                           gpointer       app)
+{
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    virt_viewer_session_smartcard_remove(virt_viewer_app_get_session(self));
+}
 
 static void
 fullscreen_activated(GSimpleAction *action,
@@ -1874,9 +1894,9 @@ usb_device_selection_activated (GSimpleAction *action,
 }*/
 
 static void
-zoom_in_activated (GSimpleAction *action,
-                   GVariant      *parameter,
-                   gpointer       app)
+zoom_in_activated(GSimpleAction *action,
+                  GVariant      *parameter,
+                  gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
 
@@ -1885,9 +1905,9 @@ zoom_in_activated (GSimpleAction *action,
 }
 
 static void
-zoom_out_activated (GSimpleAction *action,
-                    GVariant      *parameter,
-                    gpointer       app)
+zoom_out_activated(GSimpleAction *action,
+                   GVariant      *parameter,
+                   gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
 
@@ -1896,19 +1916,35 @@ zoom_out_activated (GSimpleAction *action,
 }
 
 static void
-zoom_reset_activated (GSimpleAction *action,
-                      GVariant      *parameter,
-                      gpointer       app)
+zoom_reset_activated(GSimpleAction *action,
+                     GVariant      *parameter,
+                     gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
 
     virt_viewer_window_set_zoom_level(self->priv->main_window, NORMAL_ZOOM_LEVEL);
 }
 
+
 static void
-guest_details_activated (GSimpleAction *action,
+release_cursor_activated(GSimpleAction *action,
                          GVariant      *parameter,
                          gpointer       app)
+{
+
+    VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
+
+    VirtViewerWindow *window = virt_viewer_app_get_main_window(self);
+
+    VirtViewerDisplay *display = virt_viewer_window_get_display(window);
+
+    virt_viewer_display_release_cursor(display);
+}
+
+static void
+guest_details_activated(GSimpleAction *action,
+                        GVariant      *parameter,
+                        gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
 
@@ -1916,9 +1952,9 @@ guest_details_activated (GSimpleAction *action,
 }
 
 static void
-quit_activated (GSimpleAction *action,
-                GVariant      *parameter,
-                gpointer       app)
+quit_activated(GSimpleAction *action,
+               GVariant      *parameter,
+               gpointer       app)
 {
     g_application_quit (G_APPLICATION (app));
 }
@@ -1932,19 +1968,22 @@ static GActionEntry app_entries[] =
 
 static GActionEntry gear_entries[] = {
     { "screenshot", screenshot_activated, NULL, NULL, NULL, {0,0,0} },
-/*    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },*/
+    // { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} },
+    { "smartcard-insert", smartcard_insert_activated, NULL, NULL, NULL, {0,0,0} },
+    { "smartcard-remove", smartcard_remove_activated, NULL, NULL, NULL, {0,0,0} },
     { "fullscreen", fullscreen_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-in", zoom_in_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-out", zoom_out_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-reset", zoom_reset_activated, NULL, NULL, NULL, {0,0,0} },
+    { "release-cursor", release_cursor_activated, NULL, NULL, NULL, {0,0,0} },
     { "guest-details", guest_details_activated, NULL, NULL, NULL, {0,0,0} },
     { "quit", quit_activated, NULL, NULL, NULL, {0,0,0} }
 };
 
 static void
-add_accelerator (GtkApplication *app,
-                 const gchar    *action_name,
-                 const gchar    *accel)
+add_accelerator(GtkApplication *app,
+                const gchar    *action_name,
+                const gchar    *accel)
 {
     const gchar *vaccels[] = {
         accel,

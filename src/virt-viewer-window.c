@@ -47,11 +47,7 @@
 gboolean virt_viewer_window_delete(GtkWidget *src, void *dummy, VirtViewerWindow *self);
 void virt_viewer_window_menu_file_quit(GtkWidget *src, VirtViewerWindow *self);
 void virt_viewer_window_guest_details_response(GtkDialog *dialog, gint response_id, gpointer user_data);
-
 void virt_viewer_window_menu_send(GtkWidget *menu, VirtViewerWindow *self);
-void virt_viewer_window_menu_file_smartcard_insert(GtkWidget *menu, VirtViewerWindow *self);
-void virt_viewer_window_menu_file_smartcard_remove(GtkWidget *menu, VirtViewerWindow *self);
-void virt_viewer_window_menu_view_release_cursor(GtkWidget *menu, VirtViewerWindow *self);
 
 /* Internal methods */
 static void virt_viewer_window_enable_modifiers(VirtViewerWindow *self);
@@ -218,6 +214,7 @@ virt_viewer_window_constructed(GObject *object)
     g_signal_connect(priv->app, "notify::enable-accel",
                      G_CALLBACK(rebuild_combo_menu), object);
     rebuild_combo_menu(NULL, NULL, object);
+
 }
 
 static void
@@ -308,7 +305,13 @@ static GActionEntry gear_entries[] = {
 };
 
 static void
-virt_viewer_window_menu_view_fullscreen_cb(GtkButton *button, VirtViewerWindow *self)
+virt_viewer_window_fullscreen_cb(GtkButton *button, VirtViewerWindow *self)
+{
+    virt_viewer_window_menu_view_fullscreen(self);
+}
+
+static void
+virt_viewer_window_keyboard_shortcut_cb(GtkButton *button, VirtViewerWindow *self)
 {
     virt_viewer_window_menu_view_fullscreen(self);
 }
@@ -322,6 +325,7 @@ virt_viewer_window_init (VirtViewerWindow *self)
     GSList *accels;
     GtkWidget *gears;
     GtkWidget *fullscreen;
+    GtkWidget *keyboard_shortcut;
     GMenuModel *gears_menu;
 
     self->priv = GET_PRIVATE(self);
@@ -338,16 +342,6 @@ virt_viewer_window_init (VirtViewerWindow *self)
     gtk_builder_connect_signals(priv->builder, self);
 
     priv->accel_group = GTK_ACCEL_GROUP(gtk_builder_get_object(priv->builder, "accelgroup"));
-
-    /* make sure they can be activated even if the menu item is not visible */
-    g_signal_connect(gtk_builder_get_object(priv->builder, "menu-view-fullscreen"),
-                     "can-activate-accel", G_CALLBACK(can_activate_cb), self);
-    g_signal_connect(gtk_builder_get_object(priv->builder, "menu-file-smartcard-insert"),
-                     "can-activate-accel", G_CALLBACK(can_activate_cb), self);
-    g_signal_connect(gtk_builder_get_object(priv->builder, "menu-file-smartcard-remove"),
-                     "can-activate-accel", G_CALLBACK(can_activate_cb), self);
-    g_signal_connect(gtk_builder_get_object(priv->builder, "menu-view-release-cursor"),
-                     "can-activate-accel", G_CALLBACK(can_activate_cb), self);
 
     vbox = GTK_WIDGET(gtk_builder_get_object(priv->builder, "viewer-box"));
     virt_viewer_window_toolbar_setup(self);
@@ -371,7 +365,12 @@ virt_viewer_window_init (VirtViewerWindow *self)
     gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (gears), gears_menu);
 
     fullscreen = GTK_WIDGET(gtk_builder_get_object(priv->builder, "fullscreen"));
-    g_signal_connect(fullscreen, "clicked", G_CALLBACK(virt_viewer_window_menu_view_fullscreen_cb), self);
+    g_signal_connect(fullscreen, "clicked", G_CALLBACK(virt_viewer_window_fullscreen_cb), self);
+
+    keyboard_shortcut = GTK_WIDGET(gtk_builder_get_object(priv->builder, "keyboard"));
+    GtkWidget *popover = gtk_popover_new(GTK_WIDGET(virt_viewer_window_get_keycombo_menu(self)));
+
+    gtk_menu_button_set_popover(GTK_MENU_BUTTON(keyboard_shortcut), popover);
 
     priv->window = GTK_WIDGET(gtk_builder_get_object(priv->builder, "viewer"));
     gtk_window_add_accel_group(GTK_WINDOW(priv->window), priv->accel_group);
@@ -933,28 +932,6 @@ virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self)
     }
 
     gtk_widget_destroy(dialog);
-}
-
-G_MODULE_EXPORT void
-virt_viewer_window_menu_file_smartcard_insert(GtkWidget *menu G_GNUC_UNUSED,
-                                              VirtViewerWindow *self)
-{
-    virt_viewer_session_smartcard_insert(virt_viewer_app_get_session(self->priv->app));
-}
-
-G_MODULE_EXPORT void
-virt_viewer_window_menu_file_smartcard_remove(GtkWidget *menu G_GNUC_UNUSED,
-                                              VirtViewerWindow *self)
-{
-    virt_viewer_session_smartcard_remove(virt_viewer_app_get_session(self->priv->app));
-}
-
-G_MODULE_EXPORT void
-virt_viewer_window_menu_view_release_cursor(GtkWidget *menu G_GNUC_UNUSED,
-                                            VirtViewerWindow *self)
-{
-    g_return_if_fail(self->priv->display != NULL);
-    virt_viewer_display_release_cursor(VIRT_VIEWER_DISPLAY(self->priv->display));
 }
 
 G_MODULE_EXPORT void
