@@ -291,18 +291,40 @@ can_activate_cb (GtkWidget *widget G_GNUC_UNUSED,
 }
 
 static void
-usb_device_selection_activated (GSimpleAction *action,
-                                GVariant      *parameter,
-                                gpointer       window)
+usb_device_selection_activated(GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       window)
 {
     VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
 
     virt_viewer_session_usb_device_selection(virt_viewer_app_get_session(self->priv->app),
                                              GTK_WINDOW(self->priv->window));
 }
+static void
+keyboard_shortcuts_activated(GSimpleAction *action,
+                             GVariant      *parameter,
+                             gpointer       window)
+{
+    g_print("\t TODO \t");
+}
 
 static GActionEntry gear_entries[] = {
-    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} }
+    { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} }, 
+    { "Ctrl+Alt+_Del", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+_Backspace", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_1", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_2", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_3", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_4", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_5", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_6", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_7", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_8", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F_9", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F1_0", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F11", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "Ctrl+Alt+F12", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "_PrintScreen", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
 };
 
 static void
@@ -521,21 +543,21 @@ struct keyComboDef {
 };
 
 static const struct keyComboDef keyCombos[] = {
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_Delete, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + _Del"), "<virt-viewer>/send/secure-attention"},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_BackSpace, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + _Backspace"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_Delete, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+_Del"), "<virt-viewer>/send/secure-attention"},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_BackSpace, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+_Backspace"), NULL},
     { { GDK_KEY_VoidSymbol }, "" , NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F1, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_1"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F2, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_2"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F3, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_3"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F4, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_4"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F5, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_5"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F6, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_6"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F7, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_7"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F8, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_8"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F9, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F_9"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F10, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F1_0"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F11, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F11"), NULL},
-    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F12, GDK_KEY_VoidSymbol }, N_("Ctrl + Alt + F12"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F1, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_1"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F2, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_2"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F3, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_3"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F4, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_4"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F5, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_5"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F6, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_6"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F7, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_7"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F8, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_8"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F9, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F_9"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F10, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F1_0"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F11, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F11"), NULL},
+    { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F12, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F12"), NULL},
     { { GDK_KEY_VoidSymbol }, "" , NULL},
     { { GDK_KEY_Print, GDK_KEY_VoidSymbol }, "_PrintScreen", NULL},
 };
