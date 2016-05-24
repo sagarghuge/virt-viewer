@@ -61,6 +61,74 @@
     </item>
   </section>
   </menu>
+  <menu id="keyboard-menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + _Del</attribute>
+        <attribute name="action">win.ctrl+alt+del</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + _Backspace</attribute>
+        <attribute name="action">win.ctrl+alt+backspace</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_1</attribute>
+        <attribute name="action">win.ctrl+alt+f1</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_2</attribute>
+        <attribute name="action">win.ctrl+alt+f2</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_3</attribute>
+        <attribute name="action">win.ctrl+alt+f3</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_4</attribute>
+        <attribute name="action">win.ctrl+alt+f4</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_5</attribute>
+        <attribute name="action">win.ctrl+alt+f5</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_6</attribute>
+        <attribute name="action">win.ctrl+alt+f6</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_7</attribute>
+        <attribute name="action">win.ctrl+alt+f7</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_8</attribute>
+        <attribute name="action">win.ctrl+alt+f8</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_9</attribute>
+        <attribute name="action">win.ctrl+alt+f9</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_10</attribute>
+        <attribute name="action">win.ctrl+alt+f10</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_11</attribute>
+        <attribute name="action">win.ctrl+alt+f11</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_12</attribute>
+        <attribute name="action">win.ctrl+alt+f12</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_PrintScreen</attribute>
+        <attribute name="action">win.printscreen</attribute>
+      </item>
+    </section>
+  </menu>
   <object class="GtkAccelGroup" id="accelgroup"/>
   <object class="GtkApplicationWindow" id="viewer">
     <property name="can_focus">False</property>

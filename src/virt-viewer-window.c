@@ -55,7 +55,6 @@ static void virt_viewer_window_disable_modifiers(VirtViewerWindow *self);
 static void virt_viewer_window_queue_resize(VirtViewerWindow *self);
 static void virt_viewer_window_toolbar_setup(VirtViewerWindow *self);
 static GtkMenu* virt_viewer_window_get_keycombo_menu(VirtViewerWindow *self);
-static GMenu* virt_viewer_window_get_gmenu(VirtViewerWindow *self);
 static void virt_viewer_window_get_minimal_dimensions(VirtViewerWindow *self, guint *width, guint *height);
 static gint virt_viewer_window_get_minimal_zoom_level(VirtViewerWindow *self);
 
@@ -191,15 +190,6 @@ virt_viewer_window_dispose (GObject *object)
 }
 
 static void
-virt_viewer_window_constructed(GObject *object)
-{
-    VirtViewerWindowPrivate *priv = VIRT_VIEWER_WINDOW(object)->priv;
-
-    if (G_OBJECT_CLASS(virt_viewer_window_parent_class)->constructed)
-        G_OBJECT_CLASS(virt_viewer_window_parent_class)->constructed(object);
-}
-
-static void
 virt_viewer_window_class_init (VirtViewerWindowClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -209,7 +199,6 @@ virt_viewer_window_class_init (VirtViewerWindowClass *klass)
     object_class->get_property = virt_viewer_window_get_property;
     object_class->set_property = virt_viewer_window_set_property;
     object_class->dispose = virt_viewer_window_dispose;
-    object_class->constructed = virt_viewer_window_constructed;
 
     g_object_class_install_property(object_class,
                                     PROP_SUBTITLE,
@@ -322,11 +311,11 @@ ctrl_alt_fn_activated(GSimpleAction *action,
 
     guint nkeys = (guint)(sizeof(keys)/sizeof(keys[0]));
 
-    char *name = g_action_get_name(action);
+    const char *name = g_action_get_name(G_ACTION(action));
 
     guint len = strlen(name) - 1;
 
-    if (g_str_equal(name, "ctrl+alt+f1")){
+    if (name[len] == '1'){
         keys[2] = GDK_KEY_F1;
     } else if (name[len] == '2'){
         keys[2] = GDK_KEY_F2;
@@ -344,11 +333,11 @@ ctrl_alt_fn_activated(GSimpleAction *action,
         keys[2] = GDK_KEY_F8;
     } else if (name[len] == '9'){
         keys[2] = GDK_KEY_F9;
-    } else if (name[len] == '10'){
+    } else if (g_str_equal(name, "ctrl+alt+f10")){  // TODO : find way to check for F10-12
         keys[2] = GDK_KEY_F10;
-    } else if (name[len] == '11'){
+    } else if (g_str_equal(name, "ctrl+alt+f11")){
         keys[2] = GDK_KEY_F11;
-    } else if (name[len] == '12'){
+    } else if (g_str_equal(name, "ctrl+alt+f12")){
         keys[2] = GDK_KEY_F12;
     } else {
         return;
@@ -408,7 +397,7 @@ virt_viewer_window_init (VirtViewerWindow *self)
     GtkWidget *gears;
     GtkWidget *fullscreen;
     GtkWidget *keyboard_shortcut;
-    GMenuModel *gears_menu;
+    GMenuModel *gears_menu, *keyboard_menu;
 
     self->priv = GET_PRIVATE(self);
     priv = self->priv;
@@ -448,9 +437,9 @@ virt_viewer_window_init (VirtViewerWindow *self)
     g_signal_connect(fullscreen, "clicked", G_CALLBACK(virt_viewer_window_fullscreen_cb), self);
 
     keyboard_shortcut = GTK_WIDGET(gtk_builder_get_object(priv->builder, "keyboard"));
-    GMenu *menu = virt_viewer_window_get_gmenu(self);
 
-    gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (keyboard_shortcut), G_MENU_MODEL(menu));
+    keyboard_menu = G_MENU_MODEL (gtk_builder_get_object (priv->builder, "keyboard-menu"));
+    gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (keyboard_shortcut), keyboard_menu);
 
     priv->window = GTK_WIDGET(gtk_builder_get_object(priv->builder, "viewer"));
     gtk_window_add_accel_group(GTK_WINDOW(priv->window), priv->accel_group);
@@ -630,24 +619,6 @@ static const struct keyComboDef keyCombos[] = {
     { { GDK_KEY_Print, GDK_KEY_VoidSymbol }, "_PrintScreen", NULL},
 };
 
-static const struct gkeyComboDef gkeyCombos[] = {
-    { N_("Ctrl + Alt + _Del"), "win.ctrl+alt+del"},
-    { N_("Ctrl + Alt + _Backspace"), "win.ctrl+alt+backspace"},
-    { N_("Ctrl + Alt + F_1"), "win.ctrl+alt+f1"},
-    { N_("Ctrl + Alt + F_2"), "win.ctrl+alt+f2"},
-    { N_("Ctrl + Alt + F_3"), "win.ctrl+alt+f3"},
-    { N_("Ctrl + Alt + F_4"), "win.ctrl+alt+f4"},
-    { N_("Ctrl + Alt + F_5"), "win.ctrl+alt+f5"},
-    { N_("Ctrl + Alt + F_6"), "win.ctrl+alt+f6"},
-    { N_("Ctrl + Alt + F_7"), "win.ctrl+alt+f7"},
-    { N_("Ctrl + Alt + F_8"), "win.ctrl+alt+f8"},
-    { N_("Ctrl + Alt + F_9"), "win.ctrl+alt+f9"},
-    { N_("Ctrl + Alt + F1_0"), "win.ctrl+alt+f10"},
-    { N_("Ctrl + Alt + F11"), "win.ctrl+alt+f11"},
-    { N_("Ctrl + Alt + F12"), "win.ctrl+alt+f12"},
-    { "_PrintScreen", "win.printscreen"},
-};
-
 static guint
 get_nkeys(const guint *keys)
 {
@@ -784,30 +755,6 @@ virt_viewer_window_get_keycombo_menu(VirtViewerWindow *self)
     }
 
     gtk_widget_show_all(GTK_WIDGET(menu));
-    return menu;
-}
-
-static void
-virt_viewer_menu_add_gmenu(VirtViewerWindow *self, GMenu *menu,
-                           const gchar *label, const gchar* action)
-{
-    GMenuItem *item;
-
-    item = g_menu_item_new (label, action);
-    g_menu_append_item (menu, item);
-}
-
-static GMenu*
-virt_viewer_window_get_gmenu(VirtViewerWindow *self)
-{
-    gint i;
-    VirtViewerWindowPrivate *priv = self->priv;
-    GMenu *menu = g_menu_new();
-
-    for (i = 0 ; i < G_N_ELEMENTS(gkeyCombos); i++) {
-        virt_viewer_menu_add_gmenu(self, menu, gkeyCombos[i].label, gkeyCombos[i].action);
-    }
-
     return menu;
 }
 
@@ -1292,7 +1239,6 @@ void
 virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitive)
 {
     VirtViewerWindowPrivate *priv;
-    GtkWidget *menu;
 
     g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
 
