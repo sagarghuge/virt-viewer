@@ -191,31 +191,12 @@ virt_viewer_window_dispose (GObject *object)
 }
 
 static void
-rebuild_combo_menu(GObject    *gobject G_GNUC_UNUSED,
-                   GParamSpec *pspec G_GNUC_UNUSED,
-                   gpointer    user_data)
-{
-    VirtViewerWindow *self = user_data;
-    GtkWidget *menu;
-
-    menu = GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send"));
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu),
-                              GTK_WIDGET(virt_viewer_window_get_keycombo_menu(self)));
-    gtk_widget_set_sensitive(menu, (self->priv->display != NULL));
-}
-
-static void
 virt_viewer_window_constructed(GObject *object)
 {
     VirtViewerWindowPrivate *priv = VIRT_VIEWER_WINDOW(object)->priv;
 
     if (G_OBJECT_CLASS(virt_viewer_window_parent_class)->constructed)
         G_OBJECT_CLASS(virt_viewer_window_parent_class)->constructed(object);
-
-    g_signal_connect(priv->app, "notify::enable-accel",
-                     G_CALLBACK(rebuild_combo_menu), object);
-    rebuild_combo_menu(NULL, NULL, object);
-
 }
 
 static void
@@ -301,30 +282,114 @@ usb_device_selection_activated(GSimpleAction *action,
                                              GTK_WINDOW(self->priv->window));
 }
 static void
-keyboard_shortcuts_activated(GSimpleAction *action,
+ctrl_alt_del_activated(GSimpleAction *action,
+                       GVariant      *parameter,
+                       gpointer       window)
+{
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
+
+    guint keys[] = { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_Delete }; 
+
+    guint nkeys = (guint)(sizeof(keys)/sizeof(keys[0]));
+
+    virt_viewer_display_send_keys(VIRT_VIEWER_DISPLAY(self->priv->display),
+                                  keys, nkeys);
+}
+
+static void
+ctrl_alt_backspace_activated(GSimpleAction *action,
                              GVariant      *parameter,
                              gpointer       window)
 {
-    g_print("\t TODO \t");
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
+
+    guint keys[] = { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_BackSpace };
+
+    guint nkeys = (guint)(sizeof(keys)/sizeof(keys[0]));
+
+    virt_viewer_display_send_keys(VIRT_VIEWER_DISPLAY(self->priv->display),
+                                  keys, nkeys);
+}
+
+static void
+ctrl_alt_fn_activated(GSimpleAction *action,
+                      GVariant      *parameter,
+                      gpointer       window)
+{
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
+
+    guint keys[] = { GDK_KEY_Control_L, GDK_KEY_Alt_L, 0 };
+
+    guint nkeys = (guint)(sizeof(keys)/sizeof(keys[0]));
+
+    char *name = g_action_get_name(action);
+
+    guint len = strlen(name) - 1;
+
+    if (g_str_equal(name, "ctrl+alt+f1")){
+        keys[2] = GDK_KEY_F1;
+    } else if (name[len] == '2'){
+        keys[2] = GDK_KEY_F2;
+    } else if (name[len] == '3'){
+        keys[2] = GDK_KEY_F3;
+    } else if (name[len] == '4'){
+        keys[2] = GDK_KEY_F4;
+    } else if (name[len] == '5'){
+        keys[2] = GDK_KEY_F5;
+    } else if (name[len] == '6'){
+        keys[2] = GDK_KEY_F6;
+    } else if (name[len] == '7'){
+        keys[2] = GDK_KEY_F7;
+    } else if (name[len] == '8'){
+        keys[2] = GDK_KEY_F8;
+    } else if (name[len] == '9'){
+        keys[2] = GDK_KEY_F9;
+    } else if (name[len] == '10'){
+        keys[2] = GDK_KEY_F10;
+    } else if (name[len] == '11'){
+        keys[2] = GDK_KEY_F11;
+    } else if (name[len] == '12'){
+        keys[2] = GDK_KEY_F12;
+    } else {
+        return;
+    }
+
+    virt_viewer_display_send_keys(VIRT_VIEWER_DISPLAY(self->priv->display),
+                                  keys, nkeys);
+}
+
+static void
+printscreen_activated(GSimpleAction *action,
+                      GVariant      *parameter,
+                      gpointer       window)
+{
+    VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
+
+    guint keys[] = { GDK_KEY_Print };
+
+    guint nkeys = (guint)(sizeof(keys)/sizeof(keys[0]));
+
+    virt_viewer_display_send_keys(VIRT_VIEWER_DISPLAY(self->priv->display),
+                                  keys, nkeys);
 }
 
 static GActionEntry gear_entries[] = {
     { "usb-device-selection", usb_device_selection_activated, NULL, NULL, NULL, {0,0,0} }, 
-    { "Ctrl+Alt+_Del", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+_Backspace", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_1", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_2", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_3", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_4", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_5", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_6", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_7", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_8", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F_9", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F1_0", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F11", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "Ctrl+Alt+F12", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
-    { "_PrintScreen", keyboard_shortcuts_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+del", ctrl_alt_del_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+backspace", ctrl_alt_backspace_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f1", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f2", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f3", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f4", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f5", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f6", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f7", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f8", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f9", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f10", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f11", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "ctrl+alt+f12", ctrl_alt_fn_activated, NULL, NULL, NULL, {0,0,0} },
+    { "printscreen", printscreen_activated, NULL, NULL, NULL, {0,0,0} },
 };
 
 static void
@@ -353,8 +418,6 @@ virt_viewer_window_init (VirtViewerWindow *self)
 
     priv->notebook = virt_viewer_notebook_new();
     priv->builder = virt_viewer_util_load_ui("virt-viewer.xml");
-
-    gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), FALSE);
 
     gtk_builder_connect_signals(priv->builder, self);
 
@@ -542,6 +605,11 @@ struct keyComboDef {
     const gchar* accel_path;
 };
 
+struct gkeyComboDef {
+    const char *label;
+    const gchar* action;
+};
+
 static const struct keyComboDef keyCombos[] = {
     { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_Delete, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+_Del"), "<virt-viewer>/send/secure-attention"},
     { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_BackSpace, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+_Backspace"), NULL},
@@ -560,6 +628,24 @@ static const struct keyComboDef keyCombos[] = {
     { { GDK_KEY_Control_L, GDK_KEY_Alt_L, GDK_KEY_F12, GDK_KEY_VoidSymbol }, N_("Ctrl+Alt+F12"), NULL},
     { { GDK_KEY_VoidSymbol }, "" , NULL},
     { { GDK_KEY_Print, GDK_KEY_VoidSymbol }, "_PrintScreen", NULL},
+};
+
+static const struct gkeyComboDef gkeyCombos[] = {
+    { N_("Ctrl + Alt + _Del"), "win.ctrl+alt+del"},
+    { N_("Ctrl + Alt + _Backspace"), "win.ctrl+alt+backspace"},
+    { N_("Ctrl + Alt + F_1"), "win.ctrl+alt+f1"},
+    { N_("Ctrl + Alt + F_2"), "win.ctrl+alt+f2"},
+    { N_("Ctrl + Alt + F_3"), "win.ctrl+alt+f3"},
+    { N_("Ctrl + Alt + F_4"), "win.ctrl+alt+f4"},
+    { N_("Ctrl + Alt + F_5"), "win.ctrl+alt+f5"},
+    { N_("Ctrl + Alt + F_6"), "win.ctrl+alt+f6"},
+    { N_("Ctrl + Alt + F_7"), "win.ctrl+alt+f7"},
+    { N_("Ctrl + Alt + F_8"), "win.ctrl+alt+f8"},
+    { N_("Ctrl + Alt + F_9"), "win.ctrl+alt+f9"},
+    { N_("Ctrl + Alt + F1_0"), "win.ctrl+alt+f10"},
+    { N_("Ctrl + Alt + F11"), "win.ctrl+alt+f11"},
+    { N_("Ctrl + Alt + F12"), "win.ctrl+alt+f12"},
+    { "_PrintScreen", "win.printscreen"},
 };
 
 static guint
@@ -701,20 +787,13 @@ virt_viewer_window_get_keycombo_menu(VirtViewerWindow *self)
     return menu;
 }
 
-
 static void
 virt_viewer_menu_add_gmenu(VirtViewerWindow *self, GMenu *menu,
-                           const guint *keys, const gchar *label, const gchar* accel_path)
+                           const gchar *label, const gchar* action)
 {
     GMenuItem *item;
-    char *action;
-    action = g_strdup_printf ("win.%s", label);
 
     item = g_menu_item_new (label, action);
-
-    guint *ckeys = g_memdup(keys, (get_nkeys(keys) + 1) * sizeof(guint));
-    g_object_set_data_full(G_OBJECT(item), "vv-keys", ckeys, g_free);
-
     g_menu_append_item (menu, item);
 }
 
@@ -725,9 +804,10 @@ virt_viewer_window_get_gmenu(VirtViewerWindow *self)
     VirtViewerWindowPrivate *priv = self->priv;
     GMenu *menu = g_menu_new();
 
-    for (i = 0 ; i < G_N_ELEMENTS(keyCombos); i++) {
-        virt_viewer_menu_add_gmenu(self, menu, keyCombos[i].keys, keyCombos[i].label, keyCombos[i].accel_path);
+    for (i = 0 ; i < G_N_ELEMENTS(gkeyCombos); i++) {
+        virt_viewer_menu_add_gmenu(self, menu, gkeyCombos[i].label, gkeyCombos[i].action);
     }
+
     return menu;
 }
 
@@ -1217,9 +1297,6 @@ virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitiv
     g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
 
     priv = self->priv;
-
-    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-send"));
-    gtk_widget_set_sensitive(menu, sensitive);
 }
 
 static void
@@ -1298,7 +1375,6 @@ virt_viewer_window_set_display(VirtViewerWindow *self, VirtViewerDisplay *displa
         if (virt_viewer_display_get_enabled(display))
             virt_viewer_window_desktop_resize(display, self);
 
-        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(self->priv->builder, "menu-send")), TRUE);
         gtk_widget_set_sensitive(self->priv->toolbar_send_key, TRUE);
     }
 }
