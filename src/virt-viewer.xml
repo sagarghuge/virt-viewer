@@ -156,6 +156,7 @@
           <object class="GtkMenuButton" id="keyboard">
             <property name="visible">True</property>
             <property name="use-popover">True</property>
+            <property name="tooltip-text">Send key combination</property>
             <style>
               <class name="image-button"/>
             </style>
@@ -174,6 +175,7 @@
         <child>
           <object class="GtkButton" id="fullscreen">
             <property name="visible">True</property>
+            <property name="tooltip-text">Fullscreen</property>
             <style>
               <class name="image-button"/>
             </style>
