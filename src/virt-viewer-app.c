@@ -1763,7 +1763,7 @@ virt_viewer_update_smartcard_accels(VirtViewerApp *self)
         sw_smartcard = FALSE;
     }
     if (sw_smartcard) {
-        g_warning("enabling smartcard shortcuts");
+        g_debug("enabling smartcard shortcuts");
         gtk_accel_map_change_entry("<virt-viewer>/file/smartcard-insert",
                                    priv->insert_smartcard_accel_key,
                                    priv->insert_smartcard_accel_mods,
@@ -1773,7 +1773,7 @@ virt_viewer_update_smartcard_accels(VirtViewerApp *self)
                                    priv->remove_smartcard_accel_mods,
                                    TRUE);
     } else {
-        g_warning("disabling smartcard shortcuts");
+        g_debug("disabling smartcard shortcuts");
         gtk_accel_map_change_entry("<virt-viewer>/file/smartcard-insert", 0, 0, TRUE);
         gtk_accel_map_change_entry("<virt-viewer>/file/smartcard-remove", 0, 0, TRUE);
     }
@@ -2298,17 +2298,22 @@ virt_viewer_app_set_hotkeys(VirtViewerApp *self, const gchar *hotkeys_str)
 
     for (hotkey = hotkeys; *hotkey != NULL; hotkey++) {
         gchar *key = strstr(*hotkey, "=");
-        if (key == NULL) {
-            g_warn_if_reached();
+        const gchar *value = (key == NULL) ? NULL : (*key = '\0', key + 1);
+        if (value == NULL || *value == '\0') {
+            g_warning("missing value for key '%s'", *hotkey);
             continue;
         }
-        *key = '\0';
 
-        gchar *accel = spice_hotkey_to_gtk_accelerator(key + 1);
+        gchar *accel = spice_hotkey_to_gtk_accelerator(value);
         guint accel_key;
         GdkModifierType accel_mods;
         gtk_accelerator_parse(accel, &accel_key, &accel_mods);
         g_free(accel);
+
+        if (accel_key == 0 && accel_mods == 0) {
+            g_warning("Invalid value '%s' for key '%s'", value, *hotkey);
+            continue;
+        }
 
         if (g_str_equal(*hotkey, "toggle-fullscreen")) {
             gtk_accel_map_change_entry("<virt-viewer>/view/toggle-fullscreen", accel_key, accel_mods, TRUE);
@@ -2519,8 +2524,8 @@ window_update_menu_displays_cb(gpointer value,
         gboolean visible;
         gchar *label;
 
-        label = g_strdup_printf(_("Display %d"), nth + 1);
-        item = gtk_check_menu_item_new_with_label(label);
+        label = g_strdup_printf(_("Display _%d"), nth + 1);
+        item = gtk_check_menu_item_new_with_mnemonic(label);
         g_free(label);
 
         visible = vwin && gtk_widget_get_visible(GTK_WIDGET(virt_viewer_window_get_window(vwin)));
