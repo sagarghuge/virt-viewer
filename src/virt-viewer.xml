@@ -40,9 +40,6 @@
         </item>
       </section>
     </submenu>
-    <submenu>
-      <attribute name="label" translatable="yes">_Displays</attribute>
-    </submenu>
     <item>
       <attribute name="label" translatable="yes">Release cursor</attribute>
       <attribute name="action">win.release-cursor</attribute>
@@ -147,6 +144,26 @@
             <style>
               <class name="image-button"/>
             </style>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="displays">
+            <property name="visible">True</property>
+            <property name="use-popover">True</property>
+            <property name="tooltip-text">Select display</property>
+            <style>
+              <class name="image-button"/>
+            </style>
+            <child>
+              <object class="GtkImage" id="display-icon">
+                <property name="visible">True</property>
+                <property name="icon-name">video-display-symbolic</property>
+                <property name="icon-size">1</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="pack-type">end</property>

@@ -1215,7 +1215,7 @@ virt_viewer_window_set_menu_displays_sensitive(VirtViewerWindow *self, gboolean 
     g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
 
     priv = self->priv;
-    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "menu-displays"));
+    menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "displays"));
     gtk_widget_set_sensitive(menu, sensitive);
 }
 
@@ -1425,6 +1425,14 @@ virt_viewer_window_get_menu_displays(VirtViewerWindow *self)
     g_return_val_if_fail(VIRT_VIEWER_IS_WINDOW(self), NULL);
 
     return GTK_MENU_ITEM(gtk_builder_get_object(self->priv->builder, "menu-displays"));
+}
+
+GtkMenuButton*
+virt_viewer_window_get_menu_button_displays(VirtViewerWindow *self)
+{
+    g_return_val_if_fail(VIRT_VIEWER_IS_WINDOW(self), NULL);
+
+    return GTK_MENU_BUTTON(gtk_builder_get_object(self->priv->builder, "displays"));
 }
 
 GtkBuilder*

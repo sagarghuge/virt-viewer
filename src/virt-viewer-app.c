@@ -2510,6 +2510,8 @@ window_update_menu_displays_cb(gpointer value,
     gboolean sensitive;
 
     keys = g_list_sort(keys, update_menu_displays_sort);
+    GMenu *menu = g_menu_new();
+    GtkMenuButton *menuButton = virt_viewer_window_get_menu_button_displays(VIRT_VIEWER_WINDOW(value));
     submenu = window_empty_display_submenu(VIRT_VIEWER_WINDOW(value));
 
     sensitive = (keys != NULL);
@@ -2520,16 +2522,30 @@ window_update_menu_displays_cb(gpointer value,
         int nth = GPOINTER_TO_INT(tmp->data);
         VirtViewerWindow *vwin = virt_viewer_app_get_nth_window(self, nth);
         VirtViewerDisplay *display = VIRT_VIEWER_DISPLAY(g_hash_table_lookup(self->priv->displays, tmp->data));
-        GtkWidget *item;
+        GMenuItem *item;
+        gchar *acname;
+        gchar *acfullname;
+        GSimpleAction *action;
+        GAction *act;
         gboolean visible;
         gchar *label;
 
-        label = g_strdup_printf(_("Display _%d"), nth + 1);
-        item = gtk_check_menu_item_new_with_mnemonic(label);
-        g_free(label);
-
         visible = vwin && gtk_widget_get_visible(GTK_WIDGET(virt_viewer_window_get_window(vwin)));
-        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), visible);
+
+        acname = g_strdup_printf ("display-action-%d", nth + 1);
+        action = g_simple_action_new_stateful(acname, NULL, g_variant_new_boolean(visible));
+
+        label = g_strdup_printf(_("Display _%d"), nth + 1);
+        acfullname = g_strdup_printf ("app.%s", acname);
+        item = g_menu_item_new(label, acfullname);
+        g_free(label);
+        g_free(acfullname);
+
+        g_action_map_add_action (G_ACTION_MAP (self), G_ACTION (action));
+
+        act = g_action_map_lookup_action (G_ACTION_MAP (self), acname);
+
+        g_simple_action_set_enabled(G_SIMPLE_ACTION(act), visible);
 
         sensitive = visible;
         if (display) {
@@ -2541,15 +2557,17 @@ window_update_menu_displays_cb(gpointer value,
             if (virt_viewer_display_get_selectable(display))
                 sensitive = TRUE;
         }
-        gtk_widget_set_sensitive(item, sensitive);
 
-        virt_viewer_signal_connect_object(G_OBJECT(item), "toggled",
+        virt_viewer_signal_connect_object(G_OBJECT(action), "activate",
                                           G_CALLBACK(menu_display_visible_toggled_cb), display, 0);
-        gtk_menu_shell_append(submenu, item);
+
+        g_object_unref (action);
+
+        g_menu_append_item(menu, item);
         tmp = tmp->next;
     }
 
-    gtk_widget_show_all(GTK_WIDGET(submenu));
+    gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (menuButton), G_MENU_MODEL(menu));
     g_list_free(keys);
 }
 
