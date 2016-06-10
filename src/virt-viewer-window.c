@@ -55,7 +55,6 @@ static void virt_viewer_window_disable_modifiers(VirtViewerWindow *self);
 static void virt_viewer_window_queue_resize(VirtViewerWindow *self);
 static void virt_viewer_window_toolbar_setup(VirtViewerWindow *self);
 static GtkMenu* virt_viewer_window_get_keycombo_menu(VirtViewerWindow *self);
-static void virt_viewer_window_get_minimal_dimensions(VirtViewerWindow *self, guint *width, guint *height);
 static gint virt_viewer_window_get_minimal_zoom_level(VirtViewerWindow *self);
 
 G_DEFINE_TYPE (VirtViewerWindow, virt_viewer_window, G_TYPE_OBJECT)
@@ -261,8 +260,8 @@ can_activate_cb (GtkWidget *widget G_GNUC_UNUSED,
 }
 
 static void
-usb_device_selection_activated(GSimpleAction *action,
-                               GVariant      *parameter,
+usb_device_selection_activated(GSimpleAction *action G_GNUC_UNUSED,
+                               GVariant      *parameter G_GNUC_UNUSED,
                                gpointer       window)
 {
     VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
@@ -271,8 +270,8 @@ usb_device_selection_activated(GSimpleAction *action,
                                              GTK_WINDOW(self->priv->window));
 }
 static void
-ctrl_alt_del_activated(GSimpleAction *action,
-                       GVariant      *parameter,
+ctrl_alt_del_activated(GSimpleAction *action G_GNUC_UNUSED,
+                       GVariant      *parameter G_GNUC_UNUSED,
                        gpointer       window)
 {
     VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
@@ -286,8 +285,8 @@ ctrl_alt_del_activated(GSimpleAction *action,
 }
 
 static void
-ctrl_alt_backspace_activated(GSimpleAction *action,
-                             GVariant      *parameter,
+ctrl_alt_backspace_activated(GSimpleAction *action G_GNUC_UNUSED,
+                             GVariant      *parameter G_GNUC_UNUSED,
                              gpointer       window)
 {
     VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
@@ -301,8 +300,8 @@ ctrl_alt_backspace_activated(GSimpleAction *action,
 }
 
 static void
-ctrl_alt_fn_activated(GSimpleAction *action,
-                      GVariant      *parameter,
+ctrl_alt_fn_activated(GSimpleAction *action G_GNUC_UNUSED,
+                      GVariant      *parameter G_GNUC_UNUSED,
                       gpointer       window)
 {
     VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
@@ -348,8 +347,8 @@ ctrl_alt_fn_activated(GSimpleAction *action,
 }
 
 static void
-printscreen_activated(GSimpleAction *action,
-                      GVariant      *parameter,
+printscreen_activated(GSimpleAction *action G_GNUC_UNUSED,
+                      GVariant      *parameter G_GNUC_UNUSED,
                       gpointer       window)
 {
     VirtViewerWindow *self =  VIRT_VIEWER_WINDOW(window);
@@ -382,7 +381,7 @@ static GActionEntry gear_entries[] = {
 };
 
 static void
-virt_viewer_window_fullscreen_cb(GtkButton *button, VirtViewerWindow *self)
+virt_viewer_window_fullscreen_cb(GtkButton *button G_GNUC_UNUSED, VirtViewerWindow *self)
 {
     virt_viewer_window_menu_view_fullscreen(self);
 }
@@ -524,7 +523,6 @@ void
 virt_viewer_window_leave_fullscreen(VirtViewerWindow *self)
 {
     VirtViewerWindowPrivate *priv = self->priv;
-    GtkWidget *menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "top-menu"));
 
     /* if we enter and leave fullscreen mode before being shown, make sure to
      * disconnect the mapped signal handler */
@@ -540,7 +538,6 @@ virt_viewer_window_leave_fullscreen(VirtViewerWindow *self)
         virt_viewer_display_set_fullscreen(priv->display, FALSE);
     }
     ViewAutoDrawer_SetActive(VIEW_AUTODRAWER(priv->layout), FALSE);
-    gtk_widget_show(menu);
     gtk_widget_hide(priv->toolbar);
     gtk_widget_set_size_request(GTK_WIDGET(priv->window), -1, -1);
     gtk_window_unfullscreen(GTK_WINDOW(priv->window));
@@ -551,7 +548,6 @@ void
 virt_viewer_window_enter_fullscreen(VirtViewerWindow *self, gint monitor)
 {
     VirtViewerWindowPrivate *priv = self->priv;
-    GtkWidget *menu = GTK_WIDGET(gtk_builder_get_object(priv->builder, "top-menu"));
 
     if (priv->fullscreen && priv->fullscreen_monitor != monitor)
         virt_viewer_window_leave_fullscreen(self);
@@ -573,7 +569,6 @@ virt_viewer_window_enter_fullscreen(VirtViewerWindow *self, gint monitor)
         return;
     }
 
-    gtk_widget_hide(menu);
     gtk_widget_show(priv->toolbar);
     ViewAutoDrawer_SetActive(VIEW_AUTODRAWER(priv->layout), TRUE);
     ViewAutoDrawer_Close(VIEW_AUTODRAWER(priv->layout));
@@ -1235,16 +1230,6 @@ virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean se
     gtk_widget_set_visible(priv->toolbar_usb_device_selection, sensitive);
 }
 
-void
-virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitive)
-{
-    VirtViewerWindowPrivate *priv;
-
-    g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
-
-    priv = self->priv;
-}
-
 static void
 display_show_hint(VirtViewerDisplay *display,
                   GParamSpec *pspec G_GNUC_UNUSED,
@@ -1419,14 +1404,6 @@ gint virt_viewer_window_get_zoom_level(VirtViewerWindow *self)
     return self->priv->zoomlevel;
 }
 
-GtkMenuItem*
-virt_viewer_window_get_menu_displays(VirtViewerWindow *self)
-{
-    g_return_val_if_fail(VIRT_VIEWER_IS_WINDOW(self), NULL);
-
-    return GTK_MENU_ITEM(gtk_builder_get_object(self->priv->builder, "menu-displays"));
-}
-
 GtkMenuButton*
 virt_viewer_window_get_menu_button_displays(VirtViewerWindow *self)
 {
@@ -1469,20 +1446,15 @@ virt_viewer_window_set_kiosk(VirtViewerWindow *self, gboolean enabled)
 }
 
 static void
-virt_viewer_window_get_minimal_dimensions(VirtViewerWindow *self,
+virt_viewer_window_get_minimal_dimensions(VirtViewerWindow *self G_GNUC_UNUSED,
                                           guint *width,
                                           guint *height)
 {
-    GtkRequisition req;
-    GtkWidget *top_menu;
-
-    top_menu = GTK_WIDGET(gtk_builder_get_object(virt_viewer_window_get_builder(self), "top-menu"));
-    gtk_widget_get_preferred_size(top_menu, &req, NULL);
     /* minimal dimensions of the window are the maximum of dimensions of the top-menu
      * and minimal dimension of the display
      */
     *height = MIN_DISPLAY_HEIGHT;
-    *width = MAX(MIN_DISPLAY_WIDTH, req.width);
+    *width = MIN_DISPLAY_WIDTH;
 }
 
 /**

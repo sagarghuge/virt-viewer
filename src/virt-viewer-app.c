@@ -778,19 +778,6 @@ virt_viewer_app_set_usb_options_sensitive(VirtViewerApp *self, gboolean sensitiv
                    GINT_TO_POINTER(sensitive));
 }
 
-static void
-set_menus_sensitive(gpointer value, gpointer user_data)
-{
-    virt_viewer_window_set_menus_sensitive(VIRT_VIEWER_WINDOW(value),
-                                           GPOINTER_TO_INT(user_data));
-}
-
-void
-virt_viewer_app_set_menus_sensitive(VirtViewerApp *self, gboolean sensitive)
-{
-    g_list_foreach(self->priv->windows, set_menus_sensitive, GINT_TO_POINTER(sensitive));
-}
-
 static VirtViewerWindow *
 virt_viewer_app_get_nth_window(VirtViewerApp *self, gint nth)
 {
@@ -1791,8 +1778,8 @@ virt_viewer_app_show_preferences(VirtViewerApp *self, GtkWidget *parent)
 }
 
 static void
-preferences_activated (GSimpleAction *action,
-                       GVariant      *parameter,
+preferences_activated (GSimpleAction *action G_GNUC_UNUSED,
+                       GVariant      *parameter G_GNUC_UNUSED,
                        gpointer       app)
 {
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
@@ -1804,8 +1791,8 @@ preferences_activated (GSimpleAction *action,
 }
 
 static void
-about_activated (GSimpleAction *action,
-                 GVariant      *parameter,
+about_activated (GSimpleAction *action G_GNUC_UNUSED,
+                 GVariant      *parameter G_GNUC_UNUSED,
                  gpointer       app)
 {
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
@@ -1841,8 +1828,8 @@ about_activated (GSimpleAction *action,
 }
 
 static void
-screenshot_activated(GSimpleAction *action,
-                     GVariant      *parameter,
+screenshot_activated(GSimpleAction *action G_GNUC_UNUSED,
+                     GVariant      *parameter G_GNUC_UNUSED,
                      gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
@@ -1850,9 +1837,9 @@ screenshot_activated(GSimpleAction *action,
     virt_viewer_window_menu_file_screenshot(self->priv->main_window);
 }
 
-static void
-fullscreen_activated(GSimpleAction *action,
-                     GVariant      *parameter,
+    static void
+fullscreen_activated(GSimpleAction *action G_GNUC_UNUSED,
+                     GVariant      *parameter G_GNUC_UNUSED,
                      gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
@@ -1873,8 +1860,8 @@ usb_device_selection_activated (GSimpleAction *action,
 }*/
 
 static void
-zoom_in_activated(GSimpleAction *action,
-                  GVariant      *parameter,
+zoom_in_activated(GSimpleAction *action G_GNUC_UNUSED,
+                  GVariant      *parameter G_GNUC_UNUSED,
                   gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
@@ -1884,8 +1871,8 @@ zoom_in_activated(GSimpleAction *action,
 }
 
 static void
-zoom_out_activated(GSimpleAction *action,
-                   GVariant      *parameter,
+zoom_out_activated(GSimpleAction *action G_GNUC_UNUSED,
+                   GVariant      *parameter G_GNUC_UNUSED,
                    gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
@@ -1895,8 +1882,8 @@ zoom_out_activated(GSimpleAction *action,
 }
 
 static void
-zoom_reset_activated(GSimpleAction *action,
-                     GVariant      *parameter,
+zoom_reset_activated(GSimpleAction *action G_GNUC_UNUSED,
+                     GVariant      *parameter G_GNUC_UNUSED,
                      gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
@@ -1905,8 +1892,8 @@ zoom_reset_activated(GSimpleAction *action,
 }
 
 static void
-guest_details_activated(GSimpleAction *action,
-                        GVariant      *parameter,
+guest_details_activated(GSimpleAction *action G_GNUC_UNUSED,
+                        GVariant      *parameter G_GNUC_UNUSED,
                         gpointer       app)
 {
     VirtViewerApp *self =  VIRT_VIEWER_APP(GTK_APPLICATION(app));
@@ -1915,8 +1902,8 @@ guest_details_activated(GSimpleAction *action,
 }
 
 static void
-quit_activated(GSimpleAction *action,
-               GVariant      *parameter,
+quit_activated(GSimpleAction *action G_GNUC_UNUSED,
+               GVariant      *parameter G_GNUC_UNUSED,
                gpointer       app)
 {
     g_application_quit (G_APPLICATION (app));
@@ -1937,7 +1924,6 @@ static GActionEntry gear_entries[] = {
     { "zoom-out", zoom_out_activated, NULL, NULL, NULL, {0,0,0} },
     { "zoom-reset", zoom_reset_activated, NULL, NULL, NULL, {0,0,0} },
     { "guest-details", guest_details_activated, NULL, NULL, NULL, {0,0,0} },
-    { "quit", quit_activated, NULL, NULL, NULL, {0,0,0} }
 };
 
 static void
@@ -2429,42 +2415,11 @@ update_menu_displays_sort(gconstpointer a, gconstpointer b)
         return 0;
 }
 
-static GtkMenuShell *
-window_empty_display_submenu(VirtViewerWindow *window)
-{
-    /* Because of what apparently is a gtk+2 bug (rhbz#922712), we
-     * cannot recreate the submenu every time we need to refresh it,
-     * otherwise the application may get frozen with the keyboard and
-     * mouse grabbed if gtk_menu_item_set_submenu is called while
-     * the menu is displayed. Reusing the same menu every time
-     * works around this issue.
-     */
-    GtkMenuItem *menu = virt_viewer_window_get_menu_displays(window);
-    GtkMenuShell *submenu;
-
-    submenu = GTK_MENU_SHELL(gtk_menu_item_get_submenu(menu));
-    if (submenu) {
-        GList *subitems;
-        GList *it;
-        subitems = gtk_container_get_children(GTK_CONTAINER(submenu));
-        for (it = subitems; it != NULL; it = it->next) {
-            gtk_container_remove(GTK_CONTAINER(submenu), GTK_WIDGET(it->data));
-        }
-        g_list_free(subitems);
-    } else {
-        submenu = GTK_MENU_SHELL(gtk_menu_new());
-        gtk_menu_item_set_submenu(menu, GTK_WIDGET(submenu));
-    }
-
-    return submenu;
-}
-
 static void
 window_update_menu_displays_cb(gpointer value,
                                gpointer user_data)
 {
     VirtViewerApp *self = VIRT_VIEWER_APP(user_data);
-    GtkMenuShell *submenu;
     GList *keys = g_hash_table_get_keys(self->priv->displays);
     GList *tmp;
     gboolean sensitive;
@@ -2472,7 +2427,6 @@ window_update_menu_displays_cb(gpointer value,
     keys = g_list_sort(keys, update_menu_displays_sort);
     GMenu *menu = g_menu_new();
     GtkMenuButton *menuButton = virt_viewer_window_get_menu_button_displays(VIRT_VIEWER_WINDOW(value));
-    submenu = window_empty_display_submenu(VIRT_VIEWER_WINDOW(value));
 
     sensitive = (keys != NULL);
     virt_viewer_window_set_menu_displays_sensitive(VIRT_VIEWER_WINDOW(value), sensitive);
