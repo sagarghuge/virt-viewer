@@ -2379,11 +2379,14 @@ virt_viewer_app_set_fullscreen(VirtViewerApp *self, gboolean fullscreen)
 }
 
 static void
-menu_display_visible_toggled_cb(GtkCheckMenuItem *checkmenuitem,
-                                VirtViewerDisplay *display)
+menu_display_visible_toggled_cb(GSimpleAction        *action,
+                                GVariant             *parameter G_GNUC_UNUSED,
+                                gpointer              data)
 {
+    VirtViewerDisplay *display = data;
     VirtViewerApp *self = virt_viewer_session_get_app(virt_viewer_display_get_session(display));
-    gboolean visible = gtk_check_menu_item_get_active(checkmenuitem);
+    GVariant *state;
+    gboolean visible;
     static gboolean reentering = FALSE;
     VirtViewerWindow *vwin;
 
@@ -2392,10 +2395,15 @@ menu_display_visible_toggled_cb(GtkCheckMenuItem *checkmenuitem,
 
     reentering = TRUE;
 
+    state = g_action_get_state(G_ACTION(action));
+    g_return_if_fail(state != NULL);
+
+    visible = !g_variant_get_boolean(state);
+
     vwin = ensure_window_for_display(self, display);
     visible = virt_viewer_app_window_set_visible(self, vwin, visible);
 
-    gtk_check_menu_item_set_active(checkmenuitem, /* will be toggled again */ !visible);
+    g_action_change_state(G_ACTION(action), g_variant_new_boolean(visible));
     reentering = FALSE;
 
     virt_viewer_session_update_displays_geometry(virt_viewer_display_get_session(display));
