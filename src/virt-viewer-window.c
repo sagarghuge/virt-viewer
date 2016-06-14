@@ -314,7 +314,11 @@ ctrl_alt_fn_activated(GSimpleAction *action G_GNUC_UNUSED,
 
     guint len = strlen(name) - 1;
 
-    if (name[len] == '1'){
+    if (g_str_equal("ctrl+alt+f11", name)){ // TODO : find way to check for F11-12
+        keys[2] = GDK_KEY_F11;
+    } else if (g_str_equal("ctrl+alt+f12", name)){
+        keys[2] = GDK_KEY_F12;
+    } else if (name[len] == '1'){
         keys[2] = GDK_KEY_F1;
     } else if (name[len] == '2'){
         keys[2] = GDK_KEY_F2;
@@ -332,12 +336,8 @@ ctrl_alt_fn_activated(GSimpleAction *action G_GNUC_UNUSED,
         keys[2] = GDK_KEY_F8;
     } else if (name[len] == '9'){
         keys[2] = GDK_KEY_F9;
-    } else if (g_str_equal(name, "ctrl+alt+f10")){  // TODO : find way to check for F10-12
+    } else if (name[len] == '0'){
         keys[2] = GDK_KEY_F10;
-    } else if (g_str_equal(name, "ctrl+alt+f11")){
-        keys[2] = GDK_KEY_F11;
-    } else if (g_str_equal(name, "ctrl+alt+f12")){
-        keys[2] = GDK_KEY_F12;
     } else {
         return;
     }

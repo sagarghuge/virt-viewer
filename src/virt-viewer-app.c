@@ -2467,7 +2467,7 @@ window_update_menu_displays_cb(gpointer value,
 
         act = g_action_map_lookup_action (G_ACTION_MAP (self), acname);
 
-        g_simple_action_set_enabled(G_SIMPLE_ACTION(act), visible);
+        g_action_change_state(G_ACTION(action), g_variant_new_boolean(visible));
 
         sensitive = visible;
         if (display) {
@@ -2479,6 +2479,8 @@ window_update_menu_displays_cb(gpointer value,
             if (virt_viewer_display_get_selectable(display))
                 sensitive = TRUE;
         }
+
+        g_simple_action_set_enabled(G_SIMPLE_ACTION(act), sensitive);
 
         virt_viewer_signal_connect_object(G_OBJECT(action), "activate",
                                           G_CALLBACK(menu_display_visible_toggled_cb), display, 0);
