@@ -1785,6 +1785,8 @@ virt_viewer_app_on_application_startup(GApplication *app)
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
     GError *error = NULL;
 
+    g_application_set_resource_base_path(app, "/org/virt-manager/virt-viewer");
+
     G_APPLICATION_CLASS(virt_viewer_app_parent_class)->startup(app);
 
     self->priv->resource = virt_viewer_get_resource();
