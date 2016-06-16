@@ -1225,9 +1225,36 @@ virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean se
     priv = self->priv;
     action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "usb-device-selection");
     g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
-                                 (sensitive == TRUE));
+                                sensitive);
 
     gtk_widget_set_visible(priv->toolbar_usb_device_selection, sensitive);
+}
+
+void
+virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitive)
+{
+    VirtViewerWindowPrivate *priv;
+    GAction *action;
+
+    g_return_if_fail(VIRT_VIEWER_IS_WINDOW(self));
+
+    priv = self->priv;
+
+    action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "screenshot");
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
+                                sensitive);
+
+    action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "zoom-in");
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
+                                sensitive);
+
+    action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "zoom-out");
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
+                                sensitive);
+
+    action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "guest-details");
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
+                                sensitive);
 }
 
 static void
