@@ -1948,6 +1948,8 @@ virt_viewer_app_on_application_startup(GApplication *app)
     GMenuModel *app_menu;
     GtkWindow  *window;
 
+    g_application_set_resource_base_path(app, "/org/virt-manager/virt-viewer");
+
     G_APPLICATION_CLASS(virt_viewer_app_parent_class)->startup(app);
 
     g_action_map_add_action_entries(G_ACTION_MAP(app),
