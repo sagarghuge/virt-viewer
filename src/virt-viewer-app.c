@@ -2004,8 +2004,6 @@ virt_viewer_app_on_application_startup(GApplication *app)
     window = GTK_WINDOW(virt_viewer_window_get_window(self->priv->main_window));
 
     g_action_map_add_action_entries (G_ACTION_MAP (window), gear_entries, G_N_ELEMENTS (gear_entries), self);
-
-    g_application_hold(app);
 }
 
 static gboolean
