@@ -103,7 +103,8 @@ static void virt_viewer_app_set_fullscreen(VirtViewerApp *self, gboolean fullscr
 static void virt_viewer_app_update_menu_displays(VirtViewerApp *self);
 static void virt_viewer_update_smartcard_accels(VirtViewerApp *self);
 static void virt_viewer_app_add_option_entries(VirtViewerApp *self, GOptionContext *context, GOptionGroup *group);
-
+static void virt_viewer_app_show_preferences(VirtViewerApp *self, GtkWidget *parent);
+static GtkWidget *virt_viewer_app_get_preferences(VirtViewerApp *self);
 
 struct _VirtViewerAppPrivate {
     VirtViewerWindow *main_window;
@@ -1780,6 +1781,83 @@ virt_viewer_update_smartcard_accels(VirtViewerApp *self)
 }
 
 static void
+virt_viewer_app_show_preferences(VirtViewerApp *self, GtkWidget *parent)
+{
+    GtkWidget *preferences = virt_viewer_app_get_preferences(self);
+
+    gtk_window_set_transient_for(GTK_WINDOW(preferences),
+                                 GTK_WINDOW(parent));
+
+    gtk_window_present(GTK_WINDOW(preferences));
+}
+
+static void
+preferences_activated (GSimpleAction *action G_GNUC_UNUSED,
+                       GVariant      *parameter G_GNUC_UNUSED,
+                       gpointer       app)
+{
+    VirtViewerApp *self = VIRT_VIEWER_APP(app);
+    GtkWidget *window;
+
+    window = GTK_WIDGET(virt_viewer_window_get_window(self->priv->main_window));
+
+    virt_viewer_app_show_preferences(self, window);
+}
+
+static void
+about_activated (GSimpleAction *action G_GNUC_UNUSED,
+                 GVariant      *parameter G_GNUC_UNUSED,
+                 gpointer       app)
+{
+    VirtViewerApp *self = VIRT_VIEWER_APP(app);
+    GtkBuilder *about;
+    GtkWidget *dialog;
+    GdkPixbuf *icon;
+    GtkWidget *window;
+
+    about = virt_viewer_util_load_ui("virt-viewer-about.ui");
+
+    dialog = GTK_WIDGET(gtk_builder_get_object(about, "about"));
+
+    window = GTK_WIDGET(virt_viewer_window_get_window(self->priv->main_window));
+
+    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION BUILDID);
+
+    icon = gdk_pixbuf_new_from_resource(VIRT_VIEWER_RESOURCE_PREFIX"/icons/48x48/virt-viewer.png", NULL);
+
+    if (icon != NULL) {
+        gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog), icon);
+        g_object_unref(icon);
+    } else {
+        gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), "virt-viewer");
+    }
+
+    gtk_window_set_transient_for(GTK_WINDOW(dialog),
+                                 GTK_WINDOW(window));
+
+    gtk_builder_connect_signals(about, window);
+
+    gtk_widget_show_all(dialog);
+
+    g_object_unref(G_OBJECT(about));
+}
+
+static void
+quit_activated(GSimpleAction *action G_GNUC_UNUSED,
+               GVariant      *parameter G_GNUC_UNUSED,
+               gpointer       app)
+{
+    g_application_quit (G_APPLICATION (app));
+}
+
+static GActionEntry app_entries[] =
+{
+    {"preferences", preferences_activated, NULL, NULL, NULL, {0,0,0} },
+    {"about", about_activated, NULL, NULL, NULL, {0,0,0} },
+    {"quit", quit_activated, NULL, NULL, NULL, {0,0,0} }
+};
+
+static void
 virt_viewer_app_on_application_startup(GApplication *app)
 {
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
@@ -1788,6 +1866,10 @@ virt_viewer_app_on_application_startup(GApplication *app)
     g_application_set_resource_base_path(app, "/org/virt-manager/virt-viewer");
 
     G_APPLICATION_CLASS(virt_viewer_app_parent_class)->startup(app);
+
+    g_action_map_add_action_entries(G_ACTION_MAP(app),
+                                    app_entries, G_N_ELEMENTS(app_entries),
+                                    app);
 
     self->priv->resource = virt_viewer_get_resource();
 
@@ -2521,17 +2603,6 @@ end:
     g_object_unref(builder);
 
     return preferences;
-}
-
-void
-virt_viewer_app_show_preferences(VirtViewerApp *self, GtkWidget *parent)
-{
-    GtkWidget *preferences = virt_viewer_app_get_preferences(self);
-
-    gtk_window_set_transient_for(GTK_WINDOW(preferences),
-                                 GTK_WINDOW(parent));
-
-    gtk_window_present(GTK_WINDOW(preferences));
 }
 
 static gboolean
