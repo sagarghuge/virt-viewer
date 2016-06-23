@@ -1,219 +1,194 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 2.6 -->
+  <menu id="gears-menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Screenshot</attribute>
+        <attribute name="action">win.screenshot</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_USB device selection</attribute>
+        <attribute name="action">win.usb-device-selection</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Zoom _In</attribute>
+        <attribute name="action">win.zoom-in</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Zoom _Out</attribute>
+        <attribute name="action">win.zoom-out</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Normal Size</attribute>
+        <attribute name="action">win.zoom-reset</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Guest Details</attribute>
+        <attribute name="action">win.guest-details</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="keyboard-menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + _Del</attribute>
+        <attribute name="action">win.ctrl+alt+del</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + _Backspace</attribute>
+        <attribute name="action">win.ctrl+alt+backspace</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_1</attribute>
+        <attribute name="action">win.ctrl+alt+f1</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_2</attribute>
+        <attribute name="action">win.ctrl+alt+f2</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_3</attribute>
+        <attribute name="action">win.ctrl+alt+f3</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_4</attribute>
+        <attribute name="action">win.ctrl+alt+f4</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_5</attribute>
+        <attribute name="action">win.ctrl+alt+f5</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_6</attribute>
+        <attribute name="action">win.ctrl+alt+f6</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_7</attribute>
+        <attribute name="action">win.ctrl+alt+f7</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_8</attribute>
+        <attribute name="action">win.ctrl+alt+f8</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_9</attribute>
+        <attribute name="action">win.ctrl+alt+f9</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_10</attribute>
+        <attribute name="action">win.ctrl+alt+f10</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_11</attribute>
+        <attribute name="action">win.ctrl+alt+f11</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Ctrl + Alt + F_12</attribute>
+        <attribute name="action">win.ctrl+alt+f12</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_PrintScreen</attribute>
+        <attribute name="action">win.printscreen</attribute>
+      </item>
+    </section>
+  </menu>
   <object class="GtkAccelGroup" id="accelgroup"/>
   <object class="GtkApplicationWindow" id="viewer">
     <property name="can_focus">False</property>
     <property name="default_width">1024</property>
     <property name="default_height">768</property>
     <signal name="delete-event" handler="virt_viewer_window_delete" swapped="no"/>
-    <child>
-      <object class="GtkVBox" id="viewer-box">
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="show-close-button">True</property>
         <child>
-          <object class="GtkMenuBar" id="top-menu">
+          <object class="GtkMenuButton" id="gears">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="direction">none</property>
+            <property name="use-popover">True</property>
+            <style>
+              <class name="image-button"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="displays">
+            <property name="visible">True</property>
+            <property name="use-popover">True</property>
+            <property name="tooltip-text">Select display</property>
+            <style>
+              <class name="image-button"/>
+            </style>
             <child>
-              <object class="GtkMenuItem" id="menu-file">
+              <object class="GtkImage" id="display-icon">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">_File</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="menu1">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="accel_group">accelgroup</property>
-                    <child>
-                      <object class="GtkMenuItem" id="menu-file-screenshot">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="label" translatable="yes">_Screenshot</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="virt_viewer_window_menu_file_screenshot" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="menu-file-usb-device-selection">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="label" translatable="yes">_USB device selection</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="virt_viewer_window_menu_file_usb_device_selection" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="menu-file-smartcard-insert">
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="accel_path">&lt;virt-viewer&gt;/file/smartcard-insert</property>
-                        <property name="label" translatable="yes">Smartcard insertion</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="virt_viewer_window_menu_file_smartcard_insert" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="menu-file-smartcard-remove">
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="accel_path">&lt;virt-viewer&gt;/file/smartcard-remove</property>
-                        <property name="label" translatable="yes">Smartcard removal</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="virt_viewer_window_menu_file_smartcard_remove" swapped="no"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="menu-view">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">_View</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="menu2">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="accel_group">accelgroup</property>
-                    <child>
-                      <object class="GtkCheckMenuItem" id="menu-view-fullscreen">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="accel_path">&lt;virt-viewer&gt;/view/toggle-fullscreen</property>
-                        <property name="label" translatable="yes">_Full screen</property>
-                        <property name="use_underline">True</property>
-                        <signal name="toggled" handler="virt_viewer_window_menu_view_fullscreen" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="menu-view-zoom">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="label" translatable="yes">_Zoom</property>
-                        <property name="use_underline">True</property>
-                        <child type="submenu">
-                          <object class="GtkMenu" id="menu4">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="accel_group">accelgroup</property>
-                            <child>
-                              <object class="GtkMenuItem" id="menu-view-zoom-in">
-                                <property name="accel_path">&lt;virt-viewer&gt;/view/zoom-in</property>
-                                <property name="label" translatable="yes">Zoom _In</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="use_underline">True</property>
-                                <signal name="activate" handler="virt_viewer_window_menu_view_zoom_in" swapped="no"/>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkMenuItem" id="menu-view-zoom-out">
-                                <property name="accel_path">&lt;virt-viewer&gt;/view/zoom-out</property>
-                                <property name="label" translatable="yes">Zoom _Out</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="use_underline">True</property>
-                                <signal name="activate" handler="virt_viewer_window_menu_view_zoom_out" swapped="no"/>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkSeparatorMenuItem" id="separatormenuitem4">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkMenuItem" id="menu-view-zoom-reset">
-                                <property name="accel_path">&lt;virt-viewer&gt;/view/zoom-reset</property>
-                                <property name="label" translatable="yes">_Normal Size</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="use_underline">True</property>
-                                <signal name="activate" handler="virt_viewer_window_menu_view_zoom_reset" swapped="no"/>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="menu-displays">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="label" translatable="yes">_Displays</property>
-                        <property name="use_underline">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="menu-view-release-cursor">
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="accel_path">&lt;virt-viewer&gt;/view/release-cursor</property>
-                        <property name="label" translatable="yes">Release cursor</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="virt_viewer_window_menu_view_release_cursor" swapped="no"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="menu-send">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">_Send key</property>
-                <property name="use_underline">True</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="menu-help">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">_Help</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="menu3">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkMenuItem" id="menu-help-guest-details">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="label" translatable="yes">_Guest Details</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="virt_viewer_window_menu_help_guest_details" swapped="no"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
+                <property name="icon-name">video-display-symbolic</property>
+                <property name="icon-size">1</property>
               </object>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="pack-type">end</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkMenuButton" id="keyboard">
+            <property name="visible">True</property>
+            <property name="use-popover">True</property>
+            <property name="tooltip-text">Send key combination</property>
+            <style>
+              <class name="image-button"/>
+            </style>
+            <child>
+              <object class="GtkImage" id="keyboard-icon">
+                <property name="visible">True</property>
+                <property name="icon-name">input-keyboard-symbolic</property>
+                <property name="icon-size">1</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="fullscreen">
+            <property name="visible">True</property>
+            <property name="tooltip-text">Fullscreen</property>
+            <style>
+              <class name="image-button"/>
+            </style>
+            <child>
+              <object class="GtkImage" id="fullscreen-icon">
+                <property name="visible">True</property>
+                <property name="icon-name">view-fullscreen-symbolic</property>
+                <property name="icon-size">1</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkVBox" id="viewer-box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
       </object>
     </child>
   </object>
