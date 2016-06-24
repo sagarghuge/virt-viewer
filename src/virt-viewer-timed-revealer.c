@@ -172,7 +172,6 @@ virt_viewer_timed_revealer_new(GtkWidget *toolbar)
 
     priv->evBox = gtk_event_box_new();
     gtk_container_add(GTK_CONTAINER(priv->evBox), priv->revealer);
-    gtk_widget_set_halign(priv->evBox, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(priv->evBox, GTK_ALIGN_START);
     gtk_widget_show_all(priv->evBox);
 

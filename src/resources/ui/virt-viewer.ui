@@ -201,4 +201,86 @@
       </object>
     </child>
   </object>
+  <object class="GtkHeaderBar" id="fullscreen_headerbar">
+    <property name="visible">True</property>
+    <property name="show-close-button">True</property>
+    <child>
+      <object class="GtkButton" id="fullscreen_usb_device">
+        <property name="visible">False</property>
+        <property name="tooltip-text">USB device selection</property>
+        <style>
+          <class name="image-button"/>
+        </style>
+        <child>
+          <object class="GtkImage" id="fullscreen_usb_icon">
+            <property name="visible">True</property>
+            <property name="icon-name">media-removable-symbolic</property>
+            <property name="icon-size">1</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="pack-type">end</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkMenuButton" id="fullscreen_keyboard_button">
+        <property name="visible">True</property>
+        <property name="use-popover">True</property>
+        <property name="tooltip-text">Send key combination</property>
+        <style>
+          <class name="image-button"/>
+        </style>
+        <child>
+          <object class="GtkImage" id="fullscreen_keyboard_icon">
+            <property name="visible">True</property>
+            <property name="icon-name">input-keyboard-symbolic</property>
+            <property name="icon-size">1</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="pack-type">end</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="leave_fullscreen_button">
+        <property name="visible">True</property>
+        <property name="tooltip-text">Leave fullscreen</property>
+        <style>
+          <class name="image-button"/>
+        </style>
+        <child>
+          <object class="GtkImage" id="leave_fullscreen_image">
+            <property name="visible">True</property>
+            <property name="icon-name">view-restore-symbolic</property>
+            <property name="icon-size">1</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="pack-type">end</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="back_button">
+        <property name="visible">True</property>
+        <property name="tooltip-text">Back</property>
+        <property name="valign">start</property>
+        <style>
+          <class name="image-button"/>
+        </style>
+        <child>
+          <object class="GtkImage" id="back_image">
+            <property name="visible">True</property>
+            <property name="icon-name">go-previous</property>
+            <property name="icon-size">1</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="pack-type">start</property>
+      </packing>
+    </child>
+  </object>
 </interface>

@@ -2354,7 +2354,7 @@ window_update_menu_displays_cb(gpointer value,
     GtkMenuButton *menuButton = virt_viewer_window_get_menu_button_displays(VIRT_VIEWER_WINDOW(value));
 
     sensitive = (keys != NULL);
-    virt_viewer_window_set_menu_displays_sensitive(VIRT_VIEWER_WINDOW(value), sensitive);
+    virt_viewer_window_set_headerbar_displays_sensitive(VIRT_VIEWER_WINDOW(value), sensitive);
 
     tmp = keys;
     while (tmp) {
