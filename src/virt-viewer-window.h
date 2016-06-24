@@ -78,9 +78,13 @@ void virt_viewer_window_set_zoom_level(VirtViewerWindow *self, gint zoom_level);
 gint virt_viewer_window_get_zoom_level(VirtViewerWindow *self);
 void virt_viewer_window_leave_fullscreen(VirtViewerWindow *self);
 void virt_viewer_window_enter_fullscreen(VirtViewerWindow *self, gint monitor);
-GtkMenuItem *virt_viewer_window_get_menu_displays(VirtViewerWindow *self);
+GtkMenuButton *virt_viewer_window_get_menu_button_displays(VirtViewerWindow *self);
 GtkBuilder* virt_viewer_window_get_builder(VirtViewerWindow *window);
 void virt_viewer_window_set_kiosk(VirtViewerWindow *self, gboolean enabled);
+void virt_viewer_window_menu_help_guest_details(VirtViewerWindow *self);
+gint virt_viewer_window_get_real_zoom_level_helper(VirtViewerWindow *self);
+void virt_viewer_window_menu_file_screenshot(VirtViewerWindow *self);
+void virt_viewer_window_menu_view_fullscreen(VirtViewerWindow *self);
 
 G_END_DECLS
 
