@@ -790,17 +790,16 @@ virt_viewer_file_set_ovirt_admin(VirtViewerFile* self, gint value)
 }
 
 static void
-spice_hotkey_set_accel(const gchar *accel_path, const gchar *key)
+spice_hotkey_set_accel(VirtViewerApp *app, const gchar *action_name, const gchar *key)
 {
     gchar *accel;
-    guint accel_key;
-    GdkModifierType accel_mods;
 
     accel = spice_hotkey_to_gtk_accelerator(key);
-    gtk_accelerator_parse(accel, &accel_key, &accel_mods);
-    g_free(accel);
+    const gchar *accels[] = { accel };
 
-    gtk_accel_map_change_entry(accel_path, accel_key, accel_mods, TRUE);
+    gtk_application_set_accels_for_action(GTK_APPLICATION(app), action_name, accels);
+
+    g_free(accel);
 }
 
 static gboolean
@@ -881,13 +880,13 @@ virt_viewer_file_fill_app(VirtViewerFile* self, VirtViewerApp *app, GError **err
         gchar *val;
         static const struct {
             const char *prop;
-            const char *accel;
+            const char *action_name;
         } accels[] = {
-            { "release-cursor", "<virt-viewer>/view/release-cursor" },
-            { "toggle-fullscreen", "<virt-viewer>/view/toggle-fullscreen" },
-            { "smartcard-insert", "<virt-viewer>/file/smartcard-insert" },
-            { "smartcard-remove", "<virt-viewer>/file/smartcard-remove" },
-            { "secure-attention", "<virt-viewer>/send/secure-attention" }
+            { "release-cursor", "win.release-cursor" },
+            { "toggle-fullscreen", "win.fullscreen" },
+            { "smartcard-insert", "win.smartcard-insert" },
+            { "smartcard-remove", "win.smartcard-remove" },
+            { "secure-attention", "win.secure-attention" }
         };
         int i;
 
@@ -895,7 +894,7 @@ virt_viewer_file_fill_app(VirtViewerFile* self, VirtViewerApp *app, GError **err
             if (!virt_viewer_file_is_set(self, accels[i].prop))
                 continue;
             g_object_get(self, accels[i].prop, &val, NULL);
-            spice_hotkey_set_accel(accels[i].accel, val);
+            spice_hotkey_set_accel(app, accels[i].action_name, val);
             g_free(val);
         }
     }

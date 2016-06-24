@@ -12,7 +12,6 @@
     <file alias="icons/16x16/virt-viewer.png">../../icons/16x16/virt-viewer.png</file>
     <file alias="icons/22x22/virt-viewer.png">../../icons/22x22/virt-viewer.png</file>
     <file alias="icons/24x24/virt-viewer.png">../../icons/24x24/virt-viewer.png</file>
-    <file alias="icons/24x24/virt-viewer-usb.png">../../icons/24x24/virt-viewer-usb.png</file>
     <file alias="icons/32x32/virt-viewer.png">../../icons/32x32/virt-viewer.png</file>
     <file alias="icons/48x48/virt-viewer.png">../../icons/48x48/virt-viewer.png</file>
     <file alias="icons/256x256/virt-viewer.png">../../icons/256x256/virt-viewer.png</file>
