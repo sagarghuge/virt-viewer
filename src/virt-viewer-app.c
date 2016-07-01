@@ -1784,16 +1784,15 @@ virt_viewer_app_show_preferences(VirtViewerApp *self, GtkWidget *parent)
 {
     GtkWidget *preferences = virt_viewer_app_get_preferences(self);
 
-    gtk_window_set_transient_for(GTK_WINDOW(preferences),
-                                 GTK_WINDOW(parent));
+    gtk_window_set_transient_for(GTK_WINDOW(preferences), GTK_WINDOW(parent));
 
     gtk_window_present(GTK_WINDOW(preferences));
 }
 
 static void
 preferences_activated (GSimpleAction *action G_GNUC_UNUSED,
-                       GVariant      *parameter G_GNUC_UNUSED,
-                       gpointer       app)
+                       GVariant *parameter G_GNUC_UNUSED,
+                       gpointer app)
 {
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
     GtkWidget *window;
@@ -1805,8 +1804,8 @@ preferences_activated (GSimpleAction *action G_GNUC_UNUSED,
 
 static void
 about_activated (GSimpleAction *action G_GNUC_UNUSED,
-                 GVariant      *parameter G_GNUC_UNUSED,
-                 gpointer       app)
+                 GVariant *parameter G_GNUC_UNUSED,
+                 gpointer app)
 {
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
     GtkBuilder *about;
@@ -1831,8 +1830,7 @@ about_activated (GSimpleAction *action G_GNUC_UNUSED,
         gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), "virt-viewer");
     }
 
-    gtk_window_set_transient_for(GTK_WINDOW(dialog),
-                                 GTK_WINDOW(window));
+    gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(window));
 
     gtk_builder_connect_signals(about, window);
 
@@ -1843,8 +1841,8 @@ about_activated (GSimpleAction *action G_GNUC_UNUSED,
 
 static void
 quit_activated(GSimpleAction *action G_GNUC_UNUSED,
-               GVariant      *parameter G_GNUC_UNUSED,
-               gpointer       app)
+               GVariant *parameter G_GNUC_UNUSED,
+               gpointer app)
 {
     g_application_quit (G_APPLICATION (app));
 }
