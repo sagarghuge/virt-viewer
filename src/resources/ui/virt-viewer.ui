@@ -262,25 +262,5 @@
         <property name="pack-type">end</property>
       </packing>
     </child>
-    <child>
-      <object class="GtkButton" id="back_button">
-        <property name="visible">True</property>
-        <property name="tooltip-text">Back</property>
-        <property name="valign">start</property>
-        <style>
-          <class name="image-button"/>
-        </style>
-        <child>
-          <object class="GtkImage" id="back_image">
-            <property name="visible">True</property>
-            <property name="icon-name">go-previous</property>
-            <property name="icon-size">1</property>
-          </object>
-        </child>
-      </object>
-      <packing>
-        <property name="pack-type">start</property>
-      </packing>
-    </child>
   </object>
 </interface>

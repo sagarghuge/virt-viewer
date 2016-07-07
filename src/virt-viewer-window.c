@@ -836,7 +836,6 @@ virt_viewer_window_fullscreen_headerbar_setup(VirtViewerWindow *self)
 {
     GtkWidget  *overlay;
     GtkWidget  *leave_fullscreen;
-    GtkWidget  *back_button;
     GtkWidget  *fullscreen_keyboard_button;
     GMenuModel *keyboard_menu;
     GtkWidget  *usb_button;
@@ -848,8 +847,6 @@ virt_viewer_window_fullscreen_headerbar_setup(VirtViewerWindow *self)
 
     leave_fullscreen = GTK_WIDGET(gtk_builder_get_object(priv->builder,
                                                          "leave_fullscreen_button"));
-
-    back_button = GTK_WIDGET(gtk_builder_get_object(priv->builder, "back_button"));
 
     fullscreen_keyboard_button = GTK_WIDGET(gtk_builder_get_object(priv->builder,
                                                                    "fullscreen_keyboard_button"));
@@ -863,8 +860,6 @@ virt_viewer_window_fullscreen_headerbar_setup(VirtViewerWindow *self)
     g_signal_connect(usb_button, "clicked",
                      G_CALLBACK(virt_viewer_window_headerbar_usb_device_selection), self);
     g_signal_connect(leave_fullscreen, "clicked",
-                     G_CALLBACK(virt_viewer_window_headerbar_leave_fullscreen), self);
-    g_signal_connect(back_button, "clicked",
                      G_CALLBACK(virt_viewer_window_headerbar_leave_fullscreen), self);
 
     priv->revealer = virt_viewer_timed_revealer_new(priv->fullscreen_headerbar);
