@@ -1860,18 +1860,18 @@ static GActionEntry app_entries[] =
     {"quit", quit_activated, NULL, NULL, NULL, {0,0,0} }
 };
 
-static void
-add_accelerator(GtkApplication *app,
-                const gchar *action_name,
-                const gchar *accel)
-{
-    const gchar *vaccels[] = {
-        accel,
-        NULL
-    };
+#define MAX_KEY_COMBO 3
+struct keyComboDef {
+    const char *action_name;
+    const char *keys[MAX_KEY_COMBO];
+};
 
-    gtk_application_set_accels_for_action(app, action_name, vaccels);
-}
+static const struct keyComboDef accel_keyCombos[] = {
+    { "win.fullscreen", {"F11", NULL, NULL} },
+    { "win.zoom-in", {"<Ctrl>plus", "<Ctrl>KP_Add", NULL} },
+    { "win.zoom-out", {"<Ctrl>minus", "<Ctrl>KP_Subtract", NULL} },
+    { "win.zoom-reset", {"<Ctrl>0", "<Ctrl>KP_0", NULL} }
+};
 
 static const struct keyComboDef enable_accel_keyCombos[] = {
     { "win.release-cursor", {"<Shift>F12", NULL, NULL} },
@@ -1883,6 +1883,7 @@ static const struct keyComboDef enable_accel_keyCombos[] = {
 static void
 virt_viewer_app_on_application_startup(GApplication *app)
 {
+    gint i;
     VirtViewerApp *self = VIRT_VIEWER_APP(app);
     GError *error = NULL;
 
@@ -1894,10 +1895,10 @@ virt_viewer_app_on_application_startup(GApplication *app)
                                     app_entries, G_N_ELEMENTS(app_entries),
                                     app);
 
-    add_accelerator(GTK_APPLICATION(app), "win.fullscreen", "F11");
-    add_accelerator(GTK_APPLICATION(app), "win.zoom-in", "<Ctrl>plus");
-    add_accelerator(GTK_APPLICATION(app), "win.zoom-out", "<Ctrl>minus");
-    add_accelerator(GTK_APPLICATION(app), "win.zoom-reset", "<Ctrl>O");
+    for (i = 0 ; i < G_N_ELEMENTS(accel_keyCombos); i++) {
+        gtk_application_set_accels_for_action(GTK_APPLICATION(app),
+                                              accel_keyCombos[i].action_name, accel_keyCombos[i].keys);
+    }
 
     self->priv->resource = virt_viewer_get_resource();
 
@@ -2320,18 +2321,16 @@ menu_display_visible_toggled_cb(GSimpleAction        *action,
 {
     VirtViewerDisplay *display = data;
     VirtViewerApp *self = virt_viewer_session_get_app(virt_viewer_display_get_session(display));
-    GVariant *state;
+    GVariant *state = g_action_get_state(G_ACTION(action));;
     gboolean visible;
     static gboolean reentering = FALSE;
     VirtViewerWindow *vwin;
 
+    g_return_if_fail(state != NULL);
     if (reentering) /* do not reenter if I switch you back */
         return;
 
     reentering = TRUE;
-
-    state = g_action_get_state(G_ACTION(action));
-    g_return_if_fail(state != NULL);
 
     visible = !g_variant_get_boolean(state);
 
@@ -2365,11 +2364,12 @@ window_update_menu_displays_cb(gpointer value,
     VirtViewerApp *self = VIRT_VIEWER_APP(user_data);
     GList *keys = g_hash_table_get_keys(self->priv->displays);
     GList *tmp;
+    GMenu *menu;
     gboolean sensitive;
 
     keys = g_list_sort(keys, update_menu_displays_sort);
-    GMenu *menu = g_menu_new();
-    GtkMenuButton *menuButton = virt_viewer_window_get_menu_button_displays(VIRT_VIEWER_WINDOW(value));
+    menu = g_menu_new();
+    GtkMenuButton *button = virt_viewer_window_get_menu_button_displays(VIRT_VIEWER_WINDOW(value));
 
     sensitive = (keys != NULL);
     virt_viewer_window_set_headerbar_displays_sensitive(VIRT_VIEWER_WINDOW(value), sensitive);
@@ -2426,7 +2426,7 @@ window_update_menu_displays_cb(gpointer value,
         tmp = tmp->next;
     }
 
-    gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (menuButton), G_MENU_MODEL(menu));
+    gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (button), G_MENU_MODEL(menu));
     g_list_free(keys);
 }
 

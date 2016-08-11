@@ -294,35 +294,32 @@ ctrl_alt_fn_activated(GSimpleAction *action G_GNUC_UNUSED,
 
     const char *name = g_action_get_name(G_ACTION(action));
 
-    guint len = strlen(name) - 1;
-
-    if (g_str_equal("ctrl+alt+f11", name)){ // TODO : find way to check for F11-12
-        keys[2] = GDK_KEY_F11;
-    } else if (g_str_equal("ctrl+alt+f12", name)){
-        keys[2] = GDK_KEY_F12;
-    } else if (name[len] == '1'){
+    if (g_str_has_suffix(name, "f1"))
         keys[2] = GDK_KEY_F1;
-    } else if (name[len] == '2'){
+    else if (g_str_has_suffix(name, "f2"))
         keys[2] = GDK_KEY_F2;
-    } else if (name[len] == '3'){
+    else if (g_str_has_suffix(name, "f3"))
         keys[2] = GDK_KEY_F3;
-    } else if (name[len] == '4'){
+    else if (g_str_has_suffix(name, "f4"))
         keys[2] = GDK_KEY_F4;
-    } else if (name[len] == '5'){
+    else if (g_str_has_suffix(name, "f5"))
         keys[2] = GDK_KEY_F5;
-    } else if (name[len] == '6'){
+    else if (g_str_has_suffix(name, "f6"))
         keys[2] = GDK_KEY_F6;
-    } else if (name[len] == '7'){
+    else if (g_str_has_suffix(name, "f7"))
         keys[2] = GDK_KEY_F7;
-    } else if (name[len] == '8'){
+    else if (g_str_has_suffix(name, "f8"))
         keys[2] = GDK_KEY_F8;
-    } else if (name[len] == '9'){
+    else if (g_str_has_suffix(name, "f9"))
         keys[2] = GDK_KEY_F9;
-    } else if (name[len] == '0'){
+    else if (g_str_has_suffix(name, "f10"))
         keys[2] = GDK_KEY_F10;
-    } else {
+    else if (g_str_has_suffix(name, "f11"))
+        keys[2] = GDK_KEY_F11;
+    else if (g_str_has_suffix(name, "f12"))
+        keys[2] = GDK_KEY_F12;
+    else
         return;
-    }
 
     virt_viewer_display_send_keys(VIRT_VIEWER_DISPLAY(self->priv->display),
                                   keys, nkeys);
@@ -498,12 +495,6 @@ mapped(GtkWidget *widget, GdkEvent *event G_GNUC_UNUSED,
     self->priv->fullscreen = FALSE;
     virt_viewer_window_enter_fullscreen(self, self->priv->fullscreen_monitor);
     return FALSE;
-}
-
-gint
-virt_viewer_window_get_real_zoom_level_helper(VirtViewerWindow *self)
-{
-    return virt_viewer_window_get_real_zoom_level(self);
 }
 
 void
@@ -987,8 +978,7 @@ virt_viewer_window_set_usb_options_sensitive(VirtViewerWindow *self, gboolean se
 
     priv = self->priv;
     action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "usb-device-selection");
-    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
-                                sensitive);
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action), sensitive);
 
     gtk_widget_set_visible(priv->toolbar_usb_device_selection, sensitive);
 }
@@ -1004,24 +994,19 @@ virt_viewer_window_set_menus_sensitive(VirtViewerWindow *self, gboolean sensitiv
     priv = self->priv;
 
     action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "screenshot");
-    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
-                                sensitive);
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action), sensitive);
 
     action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "zoom-in");
-    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
-                                sensitive);
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action), sensitive);
 
     action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "zoom-out");
-    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
-                                sensitive);
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action), sensitive);
 
     action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "zoom-reset");
-    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
-                                sensitive);
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action), sensitive);
 
     action = g_action_map_lookup_action(G_ACTION_MAP(priv->window), "guest-details");
-    g_simple_action_set_enabled(G_SIMPLE_ACTION(action),
-                                sensitive);
+    g_simple_action_set_enabled(G_SIMPLE_ACTION(action), sensitive);
 }
 
 static void
@@ -1042,7 +1027,7 @@ display_show_hint(VirtViewerDisplay *display,
 }
 static gboolean
 window_key_pressed (GtkWidget *widget G_GNUC_UNUSED,
-                    GdkEvent  *event,
+                    GdkEvent *event,
                     GtkWidget *display)
 {
     gtk_widget_grab_focus(display);
@@ -1051,8 +1036,8 @@ window_key_pressed (GtkWidget *widget G_GNUC_UNUSED,
 
 static void
 screenshot_activated(GSimpleAction *action G_GNUC_UNUSED,
-                     GVariant      *parameter G_GNUC_UNUSED,
-                     gpointer       data)
+                     GVariant *parameter G_GNUC_UNUSED,
+                     gpointer data)
 {
     VirtViewerWindow *self = VIRT_VIEWER_WINDOW(data);;
 
@@ -1061,8 +1046,8 @@ screenshot_activated(GSimpleAction *action G_GNUC_UNUSED,
 
 static void
 fullscreen_activated(GSimpleAction *action G_GNUC_UNUSED,
-                     GVariant      *parameter G_GNUC_UNUSED,
-                     gpointer       data)
+                     GVariant *parameter G_GNUC_UNUSED,
+                     gpointer data)
 {
     VirtViewerWindow *self = VIRT_VIEWER_WINDOW(data);;
 
@@ -1071,30 +1056,30 @@ fullscreen_activated(GSimpleAction *action G_GNUC_UNUSED,
 
 static void
 zoom_in_activated(GSimpleAction *action G_GNUC_UNUSED,
-                  GVariant      *parameter G_GNUC_UNUSED,
-                  gpointer       data)
+                  GVariant *parameter G_GNUC_UNUSED,
+                  gpointer data)
 {
     VirtViewerWindow *self = VIRT_VIEWER_WINDOW(data);;
 
     virt_viewer_window_set_zoom_level(self,
-                                      virt_viewer_window_get_real_zoom_level_helper(self) + ZOOM_STEP);
+                                      virt_viewer_window_get_real_zoom_level(self) + ZOOM_STEP);
 }
 
 static void
 zoom_out_activated(GSimpleAction *action G_GNUC_UNUSED,
-                   GVariant      *parameter G_GNUC_UNUSED,
-                   gpointer       data)
+                   GVariant *parameter G_GNUC_UNUSED,
+                   gpointer data)
 {
     VirtViewerWindow *self = VIRT_VIEWER_WINDOW(data);;
 
     virt_viewer_window_set_zoom_level(self,
-                                      virt_viewer_window_get_real_zoom_level_helper(self) - ZOOM_STEP);
+                                      virt_viewer_window_get_real_zoom_level(self) - ZOOM_STEP);
 }
 
 static void
 zoom_reset_activated(GSimpleAction *action G_GNUC_UNUSED,
-                     GVariant      *parameter G_GNUC_UNUSED,
-                     gpointer       data)
+                     GVariant *parameter G_GNUC_UNUSED,
+                     gpointer data)
 {
     VirtViewerWindow *self = VIRT_VIEWER_WINDOW(data);;
 
@@ -1103,8 +1088,8 @@ zoom_reset_activated(GSimpleAction *action G_GNUC_UNUSED,
 
 static void
 guest_details_activated(GSimpleAction *action G_GNUC_UNUSED,
-                        GVariant      *parameter G_GNUC_UNUSED,
-                        gpointer       data)
+                        GVariant *parameter G_GNUC_UNUSED,
+                        gpointer data)
 {
     VirtViewerWindow *self = VIRT_VIEWER_WINDOW(data);;
 
